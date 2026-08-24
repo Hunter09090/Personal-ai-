@@ -295,37 +295,232 @@
 
                 <!-- TASKS -->
 
-                <section class="panel">
+                <section class="panel task-panel">
 
-                    <div class="panel-title">
+    <div class="panel-title">
 
-                        <h2>
-                            📋 Today's Tasks
-                        </h2>
+        <div>
+            <h2>📋 My Tasks</h2>
+            <p class="panel-subtitle">
+                Manage your daily tasks
+            </p>
+        </div>
 
-                        <button
-                            id="addTaskBtn"
-                            class="small-btn">
+        <button
+            id="addTaskBtn"
+            class="small-btn">
+            + Add Task
+        </button>
 
-                            + Add
-
-                        </button>
-
-                    </div>
-
-
-                    <ul id="taskList"></ul>
+    </div>
 
 
-                    <div id="emptyTasks"
-                         class="empty-state">
+    <div class="task-toolbar">
 
-                        No tasks yet.
+        <input
+            id="taskSearch"
+            type="search"
+            placeholder="🔍 Search tasks..."
+        >
 
-                    </div>
+        <select id="taskFilter">
 
-                </section>
+            <option value="all">
+                All Tasks
+            </option>
 
+            <option value="pending">
+                Pending
+            </option>
+
+            <option value="completed">
+                Completed
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <ul id="taskList"></ul>
+
+
+    <div
+        id="emptyTasks"
+        class="empty-state">
+
+        No tasks found.
+
+    </div>
+
+</section>
+
+
+
+<!-- ADD / EDIT TASK MODAL -->
+
+<div
+    id="taskModal"
+    class="modal hidden">
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="modalTitle">
+                    ➕ Add New Task
+                </h2>
+
+                <p>
+                    Create a task for yourself
+                </p>
+
+            </div>
+
+            <button
+                id="closeModalBtn"
+                class="close-modal">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="taskForm">
+
+            <label>
+                Task Title
+            </label>
+
+            <input
+                id="taskTitle"
+                type="text"
+                placeholder="What do you need to do?"
+                required
+            >
+
+
+            <div class="form-row">
+
+                <div>
+
+                    <label>
+                        Date
+                    </label>
+
+                    <input
+                        id="taskDate"
+                        type="date"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Time
+                    </label>
+
+                    <input
+                        id="taskTime"
+                        type="time"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-row">
+
+                <div>
+
+                    <label>
+                        Priority
+                    </label>
+
+                    <select id="taskPriority">
+
+                        <option value="low">
+                            🟢 Low
+                        </option>
+
+                        <option
+                            value="medium"
+                            selected>
+                            🟡 Medium
+                        </option>
+
+                        <option value="high">
+                            🔴 High
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Category
+                    </label>
+
+                    <select id="taskCategory">
+
+                        <option value="personal">
+                            👤 Personal
+                        </option>
+
+                        <option value="study">
+                            📚 Study
+                        </option>
+
+                        <option value="work">
+                            💼 Work
+                        </option>
+
+                        <option value="important">
+                            ⭐ Important
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelTaskBtn"
+                    class="cancel-btn">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="save-task-btn">
+
+                    Save Task
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 
 
                 <!-- STUDY -->
