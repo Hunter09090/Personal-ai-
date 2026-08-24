@@ -1,3 +1,5 @@
+<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,380 +16,451 @@
 
 </head>
 
-
 <body>
 
+    <!-- LOGIN PAGE -->
 
-    <!-- =====================
-         SIDEBAR
-    ====================== -->
+    <div id="loginPage" class="login-page">
 
-    <aside id="sidebar">
+        <div class="login-card">
 
-        <h2>🤖 AI Dashboard</h2>
+            <div class="logo">
+                🤖
+            </div>
 
-        <nav>
+            <h1>Personal AI</h1>
 
-            <a href="#">🏠 Dashboard</a>
-
-            <a href="#">✅ Tasks</a>
-
-            <a href="#">📚 Study</a>
-
-            <a href="#">📝 Exams</a>
-
-            <a href="#">📊 Results</a>
-
-            <a href="#">📅 Attendance</a>
-
-            <a href="#">💰 Finance</a>
-
-            <a href="#">⚙️ Settings</a>
-
-        </nav>
-
-    </aside>
+            <p class="login-subtitle">
+                Your personal productivity dashboard
+            </p>
 
 
-
-    <!-- =====================
-         MAIN
-    ====================== -->
-
-    <main>
-
-
-        <!-- HEADER -->
-
-        <header>
-
-            <div>
-
-                <h1>
-                    Good Evening, Raja 👋
-                </h1>
-
-                <p id="date">
-                    Loading date...
-                </p>
-
+            <div id="authMessage"
+                 class="auth-message">
             </div>
 
 
-            <div class="header-right">
+            <input
+                id="email"
+                type="email"
+                placeholder="Email address"
+                autocomplete="email"
+            >
 
-                <button
-                    id="menuBtn"
-                    class="menu-btn">
-                    ☰
-                </button>
 
-                <div
-                    id="clock"
-                    class="clock">
-                    00:00:00
-                </div>
+            <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                autocomplete="current-password"
+            >
 
+
+            <button
+                id="emailLoginBtn"
+                class="primary-btn">
+                Login
+            </button>
+
+
+            <button
+                id="registerBtn"
+                class="secondary-btn">
+                Create Account
+            </button>
+
+
+            <div class="divider">
+                <span>OR</span>
             </div>
 
-        </header>
+
+            <button
+                id="googleLoginBtn"
+                class="google-btn">
+
+                <span>G</span>
+                Continue with Google
+
+            </button>
+
+        </div>
+
+    </div>
 
 
 
-        <!-- =====================
-             OVERVIEW CARDS
-        ====================== -->
+    <!-- DASHBOARD -->
 
-        <section class="dashboard-cards">
+    <div id="dashboardPage"
+         class="dashboard-page hidden">
 
 
-            <div class="card">
+        <!-- SIDEBAR -->
 
-                <span class="card-icon">
-                    📋
-                </span>
+        <aside id="sidebar">
+
+            <div class="sidebar-logo">
+                🤖 Personal AI
+            </div>
+
+
+            <nav>
+
+                <a href="#" class="active">
+                    🏠 Dashboard
+                </a>
+
+                <a href="#">
+                    ✅ Tasks
+                </a>
+
+                <a href="#">
+                    📚 Study
+                </a>
+
+                <a href="#">
+                    📝 Exams
+                </a>
+
+                <a href="#">
+                    📊 Results
+                </a>
+
+                <a href="#">
+                    📅 Attendance
+                </a>
+
+                <a href="#">
+                    💰 Finance
+                </a>
+
+            </nav>
+
+
+            <button
+                id="logoutBtn"
+                class="logout-btn">
+
+                🚪 Logout
+
+            </button>
+
+        </aside>
+
+
+
+        <!-- MAIN -->
+
+        <main>
+
+
+            <!-- HEADER -->
+
+            <header>
 
                 <div>
 
-                    <h3>
-                        Today's Tasks
-                    </h3>
+                    <h1 id="welcomeText">
+                        Good Evening 👋
+                    </h1>
 
-                    <p id="taskCount">
-                        3
+                    <p id="date">
+                        Loading...
                     </p>
 
                 </div>
 
-            </div>
+
+                <div class="header-right">
+
+                    <button
+                        id="menuBtn"
+                        class="menu-btn">
+
+                        ☰
+
+                    </button>
 
 
+                    <div id="clock"
+                         class="clock">
 
-            <div class="card">
+                        00:00:00
 
-                <span class="card-icon">
-                    ✅
-                </span>
-
-                <div>
-
-                    <h3>
-                        Completed
-                    </h3>
-
-                    <p id="completedCount">
-                        0
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="card">
-
-                <span class="card-icon">
-                    📚
-                </span>
-
-                <div>
-
-                    <h3>
-                        Study Progress
-                    </h3>
-
-                    <p>
-                        30%
-                    </p>
+                    </div>
 
                 </div>
 
-            </div>
+            </header>
 
 
 
-            <div class="card">
+            <!-- CARDS -->
 
-                <span class="card-icon">
-                    ⏳
-                </span>
+            <section class="dashboard-cards">
 
-                <div>
 
-                    <h3>
-                        Pending
-                    </h3>
+                <div class="card">
 
-                    <p id="pendingCount">
-                        3
-                    </p>
+                    <span class="card-icon">
+                        📋
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Today's Tasks
+                        </h3>
+
+                        <p id="taskCount">
+                            0
+                        </p>
+
+                    </div>
 
                 </div>
 
-            </div>
+
+                <div class="card">
+
+                    <span class="card-icon">
+                        ✅
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Completed
+                        </h3>
+
+                        <p id="completedCount">
+                            0
+                        </p>
+
+                    </div>
+
+                </div>
 
 
-        </section>
+                <div class="card">
+
+                    <span class="card-icon">
+                        📚
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Study Progress
+                        </h3>
+
+                        <p>
+                            0%
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span class="card-icon">
+                        ⏳
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Pending
+                        </h3>
+
+                        <p id="pendingCount">
+                            0
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
 
 
 
-        <!-- =====================
-             CONTENT GRID
-        ====================== -->
+            <!-- CONTENT -->
 
-        <div class="content-grid">
+            <div class="content-grid">
 
 
-            <!-- TASKS -->
+                <!-- TASKS -->
 
-            <section class="panel">
+                <section class="panel">
 
-                <div class="panel-title">
+                    <div class="panel-title">
+
+                        <h2>
+                            📋 Today's Tasks
+                        </h2>
+
+                        <button
+                            id="addTaskBtn"
+                            class="small-btn">
+
+                            + Add
+
+                        </button>
+
+                    </div>
+
+
+                    <ul id="taskList"></ul>
+
+
+                    <div id="emptyTasks"
+                         class="empty-state">
+
+                        No tasks yet.
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- STUDY -->
+
+                <section class="panel">
 
                     <h2>
-                        📋 Today's Tasks
+                        📚 Study Progress
                     </h2>
 
-                    <button class="small-btn">
-                        + Add
+
+                    <div class="study-item">
+
+                        <div class="study-info">
+
+                            <span>
+                                BSS Degree
+                            </span>
+
+                            <strong>
+                                30%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="progress-container">
+
+                            <div
+                                class="progress-bar"
+                                style="width:30%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="study-item">
+
+                        <div class="study-info">
+
+                            <span>
+                                Web Development
+                            </span>
+
+                            <strong>
+                                45%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="progress-container">
+
+                            <div
+                                class="progress-bar"
+                                style="width:45%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+
+            <!-- AI -->
+
+            <section class="ai-panel">
+
+                <div class="ai-header">
+
+                    <div>
+
+                        <h2>
+                            🤖 AI Assistant
+                        </h2>
+
+                        <p>
+                            Your personal productivity assistant
+                        </p>
+
+                    </div>
+
+                    <span class="online">
+                        ● Online
+                    </span>
+
+                </div>
+
+
+                <div id="chatBox"
+                     class="chat-box">
+
+                    <div class="ai-message">
+
+                        👋 Hello! Your personal AI
+                        assistant is ready.
+
+                    </div>
+
+                </div>
+
+
+                <div class="chat-input">
+
+                    <input
+                        id="aiInput"
+                        type="text"
+                        placeholder="Ask your AI assistant..."
+                    >
+
+                    <button id="sendBtn">
+                        Send
                     </button>
 
                 </div>
 
-
-                <ul id="taskList">
-
-                    <li>
-                        <span>
-                            📚 BSS Study
-                        </span>
-
-                        <span class="task-status">
-                            Pending
-                        </span>
-                    </li>
-
-
-                    <li>
-                        <span>
-                            🧑‍🏫 Prepare Class
-                        </span>
-
-                        <span class="task-status">
-                            Pending
-                        </span>
-                    </li>
-
-
-                    <li>
-                        <span>
-                            📝 Check Exam Papers
-                        </span>
-
-                        <span class="task-status">
-                            Pending
-                        </span>
-                    </li>
-
-                </ul>
-
             </section>
 
 
+        </main>
 
-            <!-- STUDY -->
-
-            <section class="panel">
-
-                <h2>
-                    📚 Study Progress
-                </h2>
-
-
-                <div class="study-item">
-
-                    <div class="study-info">
-
-                        <span>
-                            BSS Degree
-                        </span>
-
-                        <strong>
-                            30%
-                        </strong>
-
-                    </div>
-
-
-                    <div class="progress-container">
-
-                        <div
-                            class="progress-bar"
-                            style="width: 30%;">
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="study-item">
-
-                    <div class="study-info">
-
-                        <span>
-                            Web Development
-                        </span>
-
-                        <strong>
-                            45%
-                        </strong>
-
-                    </div>
-
-
-                    <div class="progress-container">
-
-                        <div
-                            class="progress-bar"
-                            style="width: 45%;">
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-        </div>
+    </div>
 
 
 
-        <!-- =====================
-             AI ASSISTANT
-        ====================== -->
-
-        <section class="ai-panel">
-
-            <div class="ai-header">
-
-                <div>
-
-                    <h2>
-                        🤖 AI Assistant
-                    </h2>
-
-                    <p>
-                        Your personal productivity assistant
-                    </p>
-
-                </div>
-
-                <span class="online">
-                    ● Online
-                </span>
-
-            </div>
-
-
-            <div
-                id="chatBox"
-                class="chat-box">
-
-                <div class="ai-message">
-
-                    👋 Hello Raja!  
-                    How can I help you today?
-
-                </div>
-
-            </div>
-
-
-            <div class="chat-input">
-
-                <input
-                    id="aiInput"
-                    type="text"
-                    placeholder="Ask your AI assistant...">
-
-                <button id="sendBtn">
-                    Send
-                </button>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-
-    <script type="module" src="dashboard.js"></script>
+    <script type="module"
+            src="dashboard.js">
+    </script>
 
 </body>
 
-  </html>
+</html>
