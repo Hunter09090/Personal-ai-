@@ -1,6 +1,4 @@
-/* =========================
-   RESET
-========================= */
+/* style.css */
 
 * {
     margin: 0;
@@ -11,16 +9,162 @@
 
 body {
     font-family: Arial, sans-serif;
-
     background: #f5f7fb;
-
     color: #1f2937;
 }
 
 
-/* =========================
-   SIDEBAR
-========================= */
+/* LOGIN */
+
+.login-page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 10px 35px
+        rgba(0,0,0,0.10);
+
+    text-align: center;
+}
+
+
+.logo {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+
+.login-card h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+
+.login-subtitle {
+    color: #6b7280;
+    margin-bottom: 25px;
+}
+
+
+.login-card input {
+    width: 100%;
+
+    padding: 14px;
+
+    margin-bottom: 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 9px;
+
+    outline: none;
+
+    font-size: 15px;
+}
+
+
+.login-card input:focus {
+    border-color: #111827;
+}
+
+
+.primary-btn,
+.secondary-btn,
+.google-btn {
+    width: 100%;
+
+    padding: 13px;
+
+    margin-bottom: 10px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    font-weight: bold;
+}
+
+
+.primary-btn {
+    border: none;
+
+    background: #111827;
+
+    color: white;
+}
+
+
+.secondary-btn {
+    background: white;
+
+    color: #111827;
+
+    border: 1px solid #d1d5db;
+}
+
+
+.google-btn {
+    background: white;
+
+    border: 1px solid #d1d5db;
+
+    color: #333;
+}
+
+
+.google-btn span {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+
+.divider {
+    margin: 18px 0;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+}
+
+
+.auth-message {
+    min-height: 20px;
+
+    margin-bottom: 10px;
+
+    font-size: 14px;
+
+    color: #dc2626;
+}
+
+
+/* GENERAL */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* SIDEBAR */
 
 aside {
     width: 240px;
@@ -39,11 +183,19 @@ aside {
     padding: 25px 15px;
 
     z-index: 1000;
+
+    display: flex;
+
+    flex-direction: column;
 }
 
 
-aside h2 {
+.sidebar-logo {
     text-align: center;
+
+    font-size: 20px;
+
+    font-weight: bold;
 
     margin-bottom: 35px;
 }
@@ -62,22 +214,37 @@ nav a {
 
     border-radius: 8px;
 
-    transition: 0.2s;
+    transition: .2s;
 }
 
 
-nav a:hover {
+nav a:hover,
+nav a.active {
+    background: #374151;
+    color: white;
+}
+
+
+.logout-btn {
+    margin-top: auto;
+
+    border: none;
+
     background: #374151;
 
     color: white;
 
-    transform: translateX(4px);
+    padding: 12px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
 }
 
 
-/* =========================
-   MAIN
-========================= */
+/* MAIN */
 
 main {
     margin-left: 240px;
@@ -88,9 +255,7 @@ main {
 }
 
 
-/* =========================
-   HEADER
-========================= */
+/* HEADER */
 
 header {
     display: flex;
@@ -133,7 +298,9 @@ header p {
 
     font-weight: bold;
 
-    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.06);
 }
 
 
@@ -154,16 +321,13 @@ header p {
 }
 
 
-/* =========================
-   CARDS
-========================= */
+/* CARDS */
 
 .dashboard-cards {
-
     display: grid;
 
     grid-template-columns:
-        repeat(4, 1fr);
+        repeat(4,1fr);
 
     gap: 20px;
 
@@ -172,7 +336,6 @@ header p {
 
 
 .card {
-
     background: white;
 
     padding: 22px;
@@ -187,18 +350,7 @@ header p {
 
     box-shadow:
         0 3px 12px
-        rgba(0,0,0,0.06);
-
-    transition: 0.2s;
-}
-
-
-.card:hover {
-    transform: translateY(-3px);
-
-    box-shadow:
-        0 7px 18px
-        rgba(0,0,0,0.09);
+        rgba(0,0,0,.06);
 }
 
 
@@ -223,12 +375,9 @@ header p {
 }
 
 
-/* =========================
-   CONTENT GRID
-========================= */
+/* CONTENT */
 
 .content-grid {
-
     display: grid;
 
     grid-template-columns:
@@ -240,8 +389,8 @@ header p {
 }
 
 
-.panel {
-
+.panel,
+.ai-panel {
     background: white;
 
     padding: 25px;
@@ -250,12 +399,11 @@ header p {
 
     box-shadow:
         0 3px 12px
-        rgba(0,0,0,0.06);
+        rgba(0,0,0,.06);
 }
 
 
 .panel-title {
-
     display: flex;
 
     justify-content: space-between;
@@ -266,17 +414,13 @@ header p {
 }
 
 
-.panel h2 {
+.panel h2,
+.ai-panel h2 {
     font-size: 19px;
 }
 
 
-/* =========================
-   BUTTON
-========================= */
-
 .small-btn {
-
     border: none;
 
     background: #111827;
@@ -291,9 +435,7 @@ header p {
 }
 
 
-/* =========================
-   TASKS
-========================= */
+/* TASKS */
 
 #taskList {
     list-style: none;
@@ -301,7 +443,6 @@ header p {
 
 
 #taskList li {
-
     display: flex;
 
     justify-content: space-between;
@@ -318,23 +459,51 @@ header p {
 }
 
 
-.task-status {
+.task-left {
+    display: flex;
 
-    font-size: 12px;
+    align-items: center;
 
-    padding: 5px 9px;
+    gap: 9px;
 
-    background: #fff3cd;
-
-    color: #856404;
-
-    border-radius: 20px;
+    flex: 1;
 }
 
 
-/* =========================
-   STUDY
-========================= */
+.task-left.completed span {
+    text-decoration: line-through;
+
+    color: #9ca3af;
+}
+
+
+.task-checkbox {
+    width: 17px;
+    height: 17px;
+}
+
+
+.delete-task {
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+
+.empty-state {
+    text-align: center;
+
+    color: #9ca3af;
+
+    padding: 20px;
+}
+
+
+/* STUDY */
 
 .study-item {
     margin-top: 22px;
@@ -342,7 +511,6 @@ header p {
 
 
 .study-info {
-
     display: flex;
 
     justify-content: space-between;
@@ -352,7 +520,6 @@ header p {
 
 
 .progress-container {
-
     width: 100%;
 
     height: 10px;
@@ -366,37 +533,22 @@ header p {
 
 
 .progress-bar {
-
     height: 100%;
 
     background: #111827;
 
     border-radius: 20px;
-
-    transition: width 0.5s;
 }
 
 
-/* =========================
-   AI ASSISTANT
-========================= */
+/* AI */
 
 .ai-panel {
-
-    background: white;
-
-    padding: 25px;
-
-    border-radius: 14px;
-
-    box-shadow:
-        0 3px 12px
-        rgba(0,0,0,0.06);
+    margin-top: 25px;
 }
 
 
 .ai-header {
-
     display: flex;
 
     justify-content: space-between;
@@ -407,20 +559,16 @@ header p {
 }
 
 
-.ai-header h2 {
-    margin-bottom: 5px;
-}
-
-
 .ai-header p {
     color: #6b7280;
 
     font-size: 14px;
+
+    margin-top: 5px;
 }
 
 
 .online {
-
     color: #16a34a;
 
     font-size: 14px;
@@ -428,7 +576,6 @@ header p {
 
 
 .chat-box {
-
     min-height: 130px;
 
     max-height: 300px;
@@ -446,23 +593,23 @@ header p {
 
 
 .ai-message {
-
     background: white;
 
-    display: inline-block;
+    display: block;
+
+    width: fit-content;
+
+    max-width: 85%;
 
     padding: 12px 15px;
 
     border-radius: 10px;
 
-    box-shadow:
-        0 2px 5px
-        rgba(0,0,0,0.05);
+    margin-bottom: 8px;
 }
 
 
 .user-message {
-
     background: #111827;
 
     color: white;
@@ -471,16 +618,15 @@ header p {
 
     border-radius: 10px;
 
-    margin: 8px 0;
-
-    margin-left: auto;
+    margin: 8px 0 8px auto;
 
     width: fit-content;
+
+    max-width: 85%;
 }
 
 
 .chat-input {
-
     display: flex;
 
     gap: 10px;
@@ -488,7 +634,6 @@ header p {
 
 
 .chat-input input {
-
     flex: 1;
 
     padding: 13px;
@@ -503,14 +648,7 @@ header p {
 }
 
 
-.chat-input input:focus {
-
-    border-color: #111827;
-}
-
-
 .chat-input button {
-
     border: none;
 
     background: #111827;
@@ -525,28 +663,23 @@ header p {
 }
 
 
-/* =========================
-   MOBILE
-========================= */
+/* MOBILE */
 
 @media (max-width: 900px) {
 
     aside {
-
         transform: translateX(-100%);
 
-        transition: 0.3s;
+        transition: .3s;
     }
 
 
     aside.active {
-
         transform: translateX(0);
     }
 
 
     main {
-
         margin-left: 0;
 
         padding: 20px;
@@ -554,20 +687,17 @@ header p {
 
 
     .menu-btn {
-
         display: block;
     }
 
 
     .dashboard-cards {
-
         grid-template-columns:
-            repeat(2, 1fr);
+            repeat(2,1fr);
     }
 
 
     .content-grid {
-
         grid-template-columns: 1fr;
     }
 
@@ -576,28 +706,17 @@ header p {
 
 @media (max-width: 550px) {
 
-    header {
-
-        align-items: flex-start;
-
-        gap: 15px;
-    }
-
-
     header h1 {
-
         font-size: 22px;
     }
 
 
     .dashboard-cards {
-
         grid-template-columns: 1fr;
     }
 
 
     .clock {
-
         font-size: 13px;
 
         padding: 9px;
@@ -605,13 +724,11 @@ header p {
 
 
     .chat-input {
-
         flex-direction: column;
     }
 
 
     .chat-input button {
-
         padding: 12px;
     }
 
