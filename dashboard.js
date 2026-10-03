@@ -7,6 +7,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);
 const state={tasks:[],study:[],exams:[],results:[],attendance:[],finance:[],notes:[]},unsub={};
 let globalQuery="";
+let dateFilter="month",customStart="",customEnd="";
 const names=Object.keys(state);
 let modalMode="add",modalType="",modalId="";
 
@@ -148,25 +149,32 @@ function renderGlobalSearch(){
   box.innerHTML=m.length?m.map(x=>"<button class=\"global-result\" data-global-section=\""+x.section+"\" data-global-id=\""+x.id+"\"><span><strong>"+esc(x.title)+"</strong><small>"+esc(x.label)+" · "+esc(x.meta)+"</small></span><b>→</b></button>").join(""):"<div class=\"global-empty\">No matching records found.</div>";
   box.classList.remove("hidden");
 }
+function filterDateValue(v){if(!v)return false;const d=new Date(v+"T00:00:00"),now=new Date();now.setHours(0,0,0,0);if(dateFilter==="all")return true;if(dateFilter==="today")return d.getTime()===now.getTime();if(dateFilter==="week"){const day=now.getDay(),start=new Date(now);start.setDate(now.getDate()-(day===0?6:day-1));start.setHours(0,0,0,0);const end=new Date(start);end.setDate(start.getDate()+6);return d>=start&&d<=end}if(dateFilter==="month")return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();if(dateFilter==="custom"){if(!customStart&&!customEnd)return true;const s=customStart?new Date(customStart+"T00:00:00"):new Date("1900-01-01T00:00:00"),e=customEnd?new Date(customEnd+"T23:59:59"):new Date("2999-12-31T23:59:59");return d>=s&&d<=e}return true}
+function filtered(type){return (state[type]||[]).filter(x=>filterDateValue(x.date))}
+function pct(n,d){return d?Math.round(n/d*100):0}
 function renderOverview(){
   const today=new Date();today.setHours(0,0,0,0);
-  const open=state.tasks.filter(x=>!x.completed),done=state.tasks.filter(x=>x.completed);
-  const avg=state.study.length?Math.round(state.study.reduce((s,x)=>s+(+x.progress||0),0)/state.study.length):0;
+  const tasks=filtered("tasks"),study=state.study,results=filtered("results"),attendance=filtered("attendance"),finance=filtered("finance");
+  const open=tasks.filter(x=>!x.completed),done=tasks.filter(x=>x.completed);
+  const avg=study.length?Math.round(study.reduce((s,x)=>s+(+x.progress||0),0)/study.length):0;
   $("statTasks").textContent=open.length;$("statCompleted").textContent=done.length;$("statStudy").textContent=avg+"%";
-  const now=new Date(),m=now.getMonth(),y=now.getFullYear();
-  const income=state.finance.filter(x=>x.type==="income"&&x.date&&new Date(x.date+"T00:00:00").getMonth()===m&&new Date(x.date+"T00:00:00").getFullYear()===y).reduce((a,x)=>a+(+x.amount||0),0);
-  const expense=state.finance.filter(x=>x.type==="expense"&&x.date&&new Date(x.date+"T00:00:00").getMonth()===m&&new Date(x.date+"T00:00:00").getFullYear()===y).reduce((a,x)=>a+(+x.amount||0),0);
+  const income=finance.filter(x=>x.type==="income").reduce((a,x)=>a+(+x.amount||0),0),expense=finance.filter(x=>x.type==="expense").reduce((a,x)=>a+(+x.amount||0),0);
   $("statBalance").textContent=money(income-expense);
-  $("analyticsTasks").textContent=state.tasks.length?Math.round(done.length/state.tasks.length*100)+"%":"0%";
-  $("analyticsStudy").textContent=avg+"%";
-  $("analyticsResults").textContent=state.results.length?Math.round(state.results.reduce((a,x)=>a+(+x.marks||0),0)/Math.max(1,state.results.reduce((a,x)=>a+(+x.total||0),0))*100)+"%":"0%";
-  const at=state.attendance.length,p=state.attendance.filter(x=>x.status==="Present").length;
-  $("analyticsAttendance").textContent=at?Math.round(p/at*100)+"%":"0%";
+  $("analyticsTasks").textContent=pct(done.length,tasks.length)+"%";$("analyticsStudy").textContent=avg+"%";
+  const marks=results.reduce((a,x)=>a+(+x.marks||0),0),total=results.reduce((a,x)=>a+(+x.total||0),0);
+  $("analyticsResults").textContent=pct(marks,total)+"%";
+  const present=attendance.filter(x=>x.status==="Present").length;
+  $("analyticsAttendance").textContent=pct(present,attendance.length)+"%";
   $("financeAnalytics").innerHTML="<div><span>Income</span><strong>"+money(income)+"</strong></div><div><span>Expense</span><strong>"+money(expense)+"</strong></div><div><span>Net</span><strong>"+money(income-expense)+"</strong></div>";
   const a=open.slice(0,5),e=state.exams.filter(x=>x.date&&new Date(x.date+"T00:00:00")>=today).sort((x,y)=>x.date.localeCompare(y.date)).slice(0,5);
-  $("overviewTasks").innerHTML=a.length?a.map(x=>"<div class=\"compact-row\"><span class=\"dot\"></span><div><strong>"+esc(x.title)+"</strong><small>"+esc(x.category||"personal")+(x.date?" · "+date(x.date):"")+"</small></div></div>").join(""):"<div class=\"empty-mini\">You are clear. Nice.</div>";
+  $("overviewTasks").innerHTML=a.length?a.map(x=>"<div class=\"compact-row\"><span class=\"dot\"></span><div><strong>"+esc(x.title)+"</strong><small>"+esc(x.category||"personal")+(x.date?" · "+date(x.date):"")+"</small></div></div>").join(""):"<div class=\"empty-mini\">No open tasks in this period.</div>";
   $("overviewExams").innerHTML=e.length?e.map(x=>"<div class=\"compact-row\"><span class=\"date-box\">"+new Date(x.date+"T00:00:00").getDate()+"</span><div><strong>"+esc(x.subject)+"</strong><small>"+esc(x.exam)+" · "+date(x.date)+"</small></div></div>").join(""):"<div class=\"empty-mini\">No upcoming exams.</div>";
+  const completion=pct(done.length,tasks.length),studyScore=avg,resultScore=pct(marks,total),attendanceScore=pct(present,attendance.length);
+  const scores=[completion,studyScore,resultScore,attendanceScore],labels=["Tasks","Study","Results","Attendance"];
+  $("insightList").innerHTML=labels.map((l,i)=>"<div class=\"insight-row\"><div><strong>"+l+"</strong><small>"+scores[i]+"% for selected period</small></div><div class=\"mini-bar\"><span style=\"width:"+scores[i]+"%\"></span></div></div>").join("");
+  $("performanceBars").innerHTML=labels.map((l,i)=>"<div class=\"metric-bar\"><div><span>"+l+"</span><strong>"+scores[i]+"%</strong></div><div class=\"bar-track\"><span style=\"width:"+scores[i]+"%\"></span></div></div>").join("");
 }
+
 function csvEscape(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
 function downloadCSV(type){
   const rows=state[type]||[];if(!rows.length){alert("Export করার মতো কোনো data নেই।");return}
@@ -196,6 +204,9 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{const t=e.target.closest("[data-toggle-task]");if(t)patch("tasks",t.dataset.toggleTask,{completed:t.checked}).catch(x=>{t.checked=!t.checked;alert(err(x))})});
 ["taskSearch","taskFilter","taskPriorityFilter"].forEach(id=>$(id)?.addEventListener("input",renderTasks));
+$("dateFilter")?.addEventListener("change",e=>{dateFilter=e.target.value;const box=$("customDates");if(box)box.classList.toggle("hidden",dateFilter!=="custom");render()});
+$("customStart")?.addEventListener("change",e=>{customStart=e.target.value;render()});
+$("customEnd")?.addEventListener("change",e=>{customEnd=e.target.value;render()});
 $("globalSearch")?.addEventListener("input",e=>{globalQuery=e.target.value;renderGlobalSearch()});
 document.addEventListener("click",e=>{if(!e.target.closest(".global-search-wrap")){renderGlobalSearch()}});
 
