@@ -1,1 +1,195 @@
-const KEY="personalOS.v1";const EMPTY={tasks:[],goals:[],exams:[],finance:[],notes:[]};let state;try{state={...EMPTY,...JSON.parse(localStorage.getItem(KEY)||"{}")}}catch{state={...EMPTY}}const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);const id=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));const money=v=>"৳"+Number(v||0).toLocaleString("en-BD");function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}function persist(msg="Saved"){localStorage.setItem(KEY,JSON.stringify(state));render();toast(msg)}const cfg={task:["New task",[["title","Task","text",1],["date","Due date","date"],["priority","Priority","select","medium,high,low"],["repeat","Repeat","select","none,daily,weekly,monthly"]]],goal:["New goal",[["title","Goal","text",1],["progress","Progress %","number",1]]],exam:["New exam",[["name","Exam name","text",1],["subject","Subject","text",1],["date","Date","date",1]]],finance:["New finance entry",[["title","Description","text",1],["amount","Amount","number",1],["type","Type","select","income,expense"]]],note:["New note",[["title","Title","text",1],["body","Note","textarea",1]]]};let editing=null;function openForm(type,index=null){editing=index===null?null:{type,index};const c=cfg[type];$("#modalTitle").textContent=index===null?c[0]:"Edit "+type;const k=type==="task"?"tasks":type==="goal"?"goals":type==="exam"?"exams":type==="finance"?"finance":"notes";const old=index===null?{}:state[k][index];$("#form").innerHTML=c[1].map(f=>{const val=old[f[0]]??"";if(f[2]==="select")return'<label>'+f[1]+'<select name="'+f[0]+'">'+f[3].split(",").map(x=>'<option value="'+x+'" '+(val===x?"selected":"")+'>'+x[0].toUpperCase()+x.slice(1)+'</option>').join("")+"</select></label>";if(f[2]==="textarea")return'<label>'+f[1]+'<textarea name="'+f[0]+'" '+(f[3]?"required":"")+'>'+esc(val)+'</textarea></label>';return'<label>'+f[1]+'<input name="'+f[0]+'" type="'+f[2]+'" value="'+esc(val)+'" '+(f[3]?"required":"")+"></label>"}).join("")+'<div class="form-actions"><button type="button" id="cancel" class="ghost">Cancel</button><button class="primary">'+(index===null?"Save":"Update")+"</button></div>";$("#modal").classList.remove("hidden");$("#cancel").onclick=close;$("#form").onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));if(type==="goal")d.progress=Math.max(0,Math.min(100,+d.progress||0));if(type==="finance")d.amount=+d.amount||0;if(index===null){state[k].unshift({id:id(),createdAt:Date.now(),...d,...type==="task"?{done:false}:{}});persist("Created")}else{state[k][index]={...state[k][index],...d};persist("Updated")}close()}}function close(){$("#modal").classList.add("hidden");editing=null}function safe(fn){try{return fn()}catch(e){console.error(e);toast("Something went wrong")}}function nav(p){$$(".page").forEach(x=>x.classList.toggle("active",x.id===p));$$(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===p));$("#pageTitle").textContent={home:"Overview",tasks:"Tasks",goals:"Goals",exams:"Exams",finance:"Finance",notes:"Notes",insights:"Insights"}[p]||"Overview";$("#sidebar").classList.remove("open")}function remove(k,i){if(confirm("Delete this item?")){state[k].splice(i,1);persist("Deleted")}}function empty(text){return'<div class="empty-state">'+text+"</div>"}function renderInsights(){const done=state.tasks.filter(x=>x.done).length,open=state.tasks.filter(x=>!x.done).length,total=state.tasks.length,rate=total?Math.round(done/total*100):0,g=state.goals.length?Math.round(state.goals.reduce((a,x)=>a+(+x.progress||0),0)/state.goals.length):0,inc=state.finance.filter(x=>x.type==="income").reduce((a,x)=>a+(+x.amount||0),0),out=state.finance.filter(x=>x.type==="expense").reduce((a,x)=>a+(+x.amount||0),0);if($("#taskRate")){$("#taskRate").textContent=rate+"%";$("#taskRateBar").style.width=rate+"%";$("#doneCount").textContent=done;$("#openCount").textContent=open;$("#goalRate").textContent=g+"%";$("#goalRateBar").style.width=g+"%";$("#goalCount").textContent=state.goals.length;$("#flowBalance").textContent=money(inc-out);$("#insightIncome").textContent=money(inc);$("#insightExpense").textContent=money(out);const max=Math.max(inc,out,1);$("#incomeBar").style.width=Math.round(inc/max*100)+"%";$("#expenseBar").style.width=Math.round(out/max*100)+"%";$("#healthGrid").innerHTML=[["Tasks",total?rate+"% complete":"No tasks yet",rate>=70?"On track":"Needs attention"],["Goals",state.goals.length?g+"% average":"No goals yet",g>=70?"Strong momentum":"Keep moving"],["Exams",state.exams.length+" planned",state.exams.length?"Planned":"Clear"],["Notes",state.notes.length+" saved",state.notes.length?"Captured":"Empty"]].map(x=>"<div class=\"health-item\"><span>"+x[0]+"</span><b>"+x[1]+"</b><small>"+x[2]+"</small></div>").join("")}}function render(){const open=state.tasks.filter(x=>!x.done),avg=state.goals.length?Math.round(state.goals.reduce((a,x)=>a+(+x.progress||0),0)/state.goals.length):0,inc=state.finance.filter(x=>x.type==="income").reduce((a,x)=>a+(+x.amount||0),0),out=state.finance.filter(x=>x.type==="expense").reduce((a,x)=>a+(+x.amount||0),0);$("#sTasks").textContent=open.length;$("#sGoals").textContent=avg+"%";$("#sExams").textContent=state.exams.length;$("#sBalance").textContent=money(inc-out);$("#homeTasks").innerHTML=open.slice(0,5).map(x=>'<div class="item"><div><b>'+esc(x.title)+'</b><small>'+esc(x.priority||"medium")+(x.date?" · "+esc(x.date):"")+"</small></div></div>").join("")||empty("No open tasks. Nice and clear.");const exams=state.exams.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));$("#homeExams").innerHTML=exams.slice(0,5).map(x=>'<div class="item"><div><b>'+esc(x.subject)+'</b><small>'+esc(x.name)+" · "+esc(x.date)+"</small></div></div>").join("")||empty("No upcoming exams.");const q=($("#taskSearch")?.value||"").toLowerCase(),f=$("#taskFilter")?.value||"all";const tasks=state.tasks.filter(x=>(f==="all"||(f==="open"&&!x.done)||(f==="done"&&x.done))&&(x.title||"").toLowerCase().includes(q));$("#taskList").innerHTML=tasks.map(x=>{const i=state.tasks.indexOf(x);return'<div class="row"><input class="check" type="checkbox" data-check="'+i+'" '+(x.done?"checked":"")+'><div class="row-main '+(x.done?"done":"")+'"><b>'+esc(x.title)+'</b><small>'+esc(x.priority||"medium")+(x.date?" · "+esc(x.date):"")+"</small></div><div class="row-actions"><button data-edit="tasks|"+i+'">Edit</button><button class="danger" data-del="tasks|'+i+'">Delete</button></div></div>'}).join("")||empty("No matching tasks.");$("#goalList").innerHTML=state.goals.map((x,i)=>'<article class="goal"><h3>'+esc(x.title)+'</h3><div class="bar"><span style="width:'+Math.min(100,+x.progress||0)+'%"></span></div><div class="goal-meta"><span>Progress</span><b>'+esc(x.progress||0)+'%</b></div><div class="row-actions" style="margin-top:14px"><button data-edit="goals|'+i+'">Edit</button><button class="danger" data-del="goals|'+i+'">Delete</button></div></article>').join("")||empty("No goals yet.");$("#examList").innerHTML=exams.map(x=>{const i=state.exams.indexOf(x);return'<div class="row"><div class="row-main"><b>'+esc(x.subject)+'</b><small>'+esc(x.name)+" · "+esc(x.date)+"</small></div><div class="row-actions"><button data-edit="exams|"+i+'">Edit</button><button class="danger" data-del="exams|'+i+'">Delete</button></div></div>'}).join("")||empty("No exams planned.");$("#income").textContent=money(inc);$("#expense").textContent=money(out);$("#balance").textContent=money(inc-out);$("#financeList").innerHTML=state.finance.map(x=>{const i=state.finance.indexOf(x);return'<div class="row"><div class="row-main"><b>'+esc(x.title)+'</b><small>'+esc(x.type)+" · "+money(x.amount)+"</small></div><div class="row-actions"><button data-edit="finance|"+i+'">Edit</button><button class="danger" data-del="finance|'+i+'">Delete</button></div></div>'}).join("")||empty("No finance entries.");const nq=($("#noteSearch")?.value||"").toLowerCase();const notes=state.notes.filter(x=>(x.title+" "+x.body).toLowerCase().includes(nq));renderInsights();$("#noteList").innerHTML=notes.map(x=>{const i=state.notes.indexOf(x);return'<article class="note"><span class="eyebrow">NOTE</span><h3>'+esc(x.title)+'</h3><p>'+esc(x.body)+'</p><div class="row-actions"><button data-edit="notes|'+i+'">Edit</button><button class="danger" data-del="notes|'+i+'">Delete</button></div></article>'}).join("")||empty("No notes yet.")}function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="personal-os-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href);toast("Backup exported")}function importData(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.tasks)||!Array.isArray(d.goals)||!Array.isArray(d.exams)||!Array.isArray(d.finance)||!Array.isArray(d.notes))throw Error();if(!confirm("Restore this backup? Current local data will be replaced."))return;state={tasks:d.tasks,goals:d.goals,exams:d.exams,finance:d.finance,notes:d.notes};persist("Backup restored")}catch{toast("Invalid backup file")}};r.onerror=()=>toast("Could not read backup file");r.readAsText(file)}$$(".nav").forEach(x=>x.onclick=()=>nav(x.dataset.page));$$("[data-add]").forEach(x=>x.onclick=()=>openForm(x.dataset.add));$$("[data-go]").forEach(x=>x.onclick=()=>nav(x.dataset.go));$("#quickAdd").onclick=()=>openForm("task");$("#close").onclick=close;$("#modal").onclick=e=>{if(e.target===$("#modal"))close()};document.addEventListener("click",e=>{if(e.target.closest("#modal-box"))return;const del=e.target.closest("[data-del]"),edit=e.target.closest("[data-edit]");if(del){const[k,i]=del.dataset.del.split("|");remove(k,+i)}if(edit){const[k,i]=edit.dataset.edit.split("|");const type={tasks:"task",goals:"goal",exams:"exam",finance:"finance",notes:"note"}[k];openForm(type,+i)}});document.addEventListener("change",e=>{if(e.target.dataset.check!==undefined){const t=state.tasks[+e.target.dataset.check];t.done=e.target.checked;if(t.done&&t.repeat&&t.repeat!=="none"){const d=new Date(t.date||Date.now());if(t.repeat==="daily")d.setDate(d.getDate()+1);if(t.repeat==="weekly")d.setDate(d.getDate()+7);if(t.repeat==="monthly")d.setMonth(d.getMonth()+1);state.tasks.unshift({id:id(),createdAt:Date.now(),title:t.title,date:d.toISOString().slice(0,10),priority:t.priority,repeat:t.repeat,done:false});t.repeat="none"}persist(e.target.checked?"Completed":"Reopened")}});$("#captureBtn").onclick=()=>safe(()=>{const v=$("#capture").value.trim();if(!v)return;state.notes.unshift({id:id(),title:"Quick capture",body:v,createdAt:Date.now()});$("#capture").value="";persist("Captured")});$("#taskSearch").oninput=render;$("#taskFilter").onchange=render;$("#noteSearch").oninput=render;$("#menu").onclick=()=>$("#sidebar").classList.toggle("open");$(document).addEventListener("keydown",e=>{if(e.key==="Escape")close()});$("#themeBtn").onclick=()=>{const dark=document.body.classList.toggle("dark");localStorage.setItem("personalOS.dark",dark);toast(dark?"Dark mode on":"Light mode on")};$("#backupBtn").onclick=()=>safe(exportData);$("#importBtn").onclick=()=>$("#importFile").click();$("#refreshInsights").onclick=renderInsights;$("#importFile").onchange=e=>{if(e.target.files[0]){importData(e.target.files[0]);e.target.value=""}};$("#backupBtn").title="Export backup • Data stays on this device";if(localStorage.getItem("personalOS.dark")==="true")document.body.classList.add("dark");function tick(){const d=new Date();$("#clock").textContent=d.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:true});$("#today").textContent=d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});$("#hello").textContent=(d.getHours()<12?"Good morning":d.getHours()<18?"Good afternoon":"Good evening")+" 👋"}setInterval(tick,1000);tick();render();
+const KEY="personalOS.v1";
+const EMPTY={tasks:[],goals:[],exams:[],finance:[],notes:[]};
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const id=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const money=v=>"৳"+Number(v||0).toLocaleString("en-BD");
+
+let state;
+try{state={...EMPTY,...JSON.parse(localStorage.getItem(KEY)||"{}")};}
+catch{state={...EMPTY};}
+for(const k of Object.keys(EMPTY))if(!Array.isArray(state[k]))state[k]=[];
+
+let toastTimer;
+function toast(message){
+  const el=$("#toast"); if(!el)return;
+  el.textContent=message; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),1800);
+}
+function persist(message="Saved"){
+  localStorage.setItem(KEY,JSON.stringify(state)); render(); toast(message);
+}
+function safe(fn){try{fn();}catch(error){console.error(error);toast("Something went wrong");}}
+function empty(message){return '<div class="empty-state">'+esc(message)+"</div>";}
+
+const cfg={
+ task:["New task",[["title","Task","text",true],["date","Due date","date",false],["priority","Priority","select","medium,high,low"],["repeat","Repeat","select","none,daily,weekly,monthly"]]],
+ goal:["New goal",[["title","Goal","text",true],["progress","Progress %","number",true]]],
+ exam:["New exam",[["name","Exam name","text",true],["subject","Subject","text",true],["date","Date","date",true]]],
+ finance:["New finance entry",[["title","Description","text",true],["amount","Amount","number",true],["type","Type","select","income,expense"]]],
+ note:["New note",[["title","Title","text",true],["body","Note","textarea",true]]]
+};
+let editing=null;
+
+function openForm(type,index=null){
+  const c=cfg[type]; if(!c)return;
+  editing=index===null?null:{type,index};
+  const key={task:"tasks",goal:"goals",exam:"exams",finance:"finance",note:"notes"}[type];
+  const old=index===null?{}:state[key][index]||{};
+  $("#modalTitle").textContent=index===null?c[0]:"Edit "+type;
+  $("#form").innerHTML=c[1].map(([name,label,kind,extra])=>{
+    const value=old[name]??"";
+    if(kind==="select"){
+      return '<label>'+label+'<select name="'+name+'">'+String(extra).split(",").map(option=>'<option value="'+option+'" '+(value===option?"selected":"")+'>'+option[0].toUpperCase()+option.slice(1)+"</option>").join("")+"</select></label>";
+    }
+    if(kind==="textarea")return '<label>'+label+'<textarea name="'+name+'" '+(extra?"required":"")+'>'+esc(value)+"</textarea></label>";
+    return '<label>'+label+'<input name="'+name+'" type="'+kind+'" value="'+esc(value)+'" '+(extra?"required":"")+"></label>";
+  }).join("")+'<div class="form-actions"><button type="button" id="cancel" class="ghost">Cancel</button><button class="primary">'+(index===null?"Save":"Update")+"</button></div>";
+  $("#modal").classList.remove("hidden");
+  $("#cancel").onclick=close;
+  $("#form").onsubmit=e=>{
+    e.preventDefault();
+    const data=Object.fromEntries(new FormData(e.target));
+    if(type==="goal")data.progress=Math.max(0,Math.min(100,Number(data.progress)||0));
+    if(type==="finance")data.amount=Math.max(0,Number(data.amount)||0);
+    if(index===null)state[key].unshift({id:id(),createdAt:Date.now(),...data,...(type==="task"?{done:false}:{})});
+    else state[key][index]={...state[key][index],...data};
+    persist(index===null?"Created":"Updated"); close();
+  };
+}
+function close(){$("#modal").classList.add("hidden");editing=null;}
+function nav(page){
+  $$(".page").forEach(el=>el.classList.toggle("active",el.id===page));
+  $$(".nav").forEach(el=>el.classList.toggle("active",el.dataset.page===page));
+  $("#pageTitle").textContent={home:"Overview",tasks:"Tasks",goals:"Goals",exams:"Exams",finance:"Finance",notes:"Notes",insights:"Insights"}[page]||"Overview";
+  $("#sidebar").classList.remove("open");
+}
+function removeItem(key,index){
+  if(!state[key]?.[index])return;
+  if(confirm("Delete this item?")){state[key].splice(index,1);persist("Deleted");}
+}
+function renderInsights(){
+  const done=state.tasks.filter(x=>x.done).length, open=state.tasks.filter(x=>!x.done).length, total=state.tasks.length;
+  const taskRate=total?Math.round(done/total*100):0;
+  const goalRate=state.goals.length?Math.round(state.goals.reduce((sum,x)=>sum+(Number(x.progress)||0),0)/state.goals.length):0;
+  const income=state.finance.filter(x=>x.type==="income").reduce((sum,x)=>sum+(Number(x.amount)||0),0);
+  const expense=state.finance.filter(x=>x.type==="expense").reduce((sum,x)=>sum+(Number(x.amount)||0),0);
+  const set=(id,value)=>{const el=$("#"+id);if(el)el.textContent=value;};
+  set("taskRate",taskRate+"%");set("doneCount",done);set("openCount",open);
+  set("goalRate",goalRate+"%");set("goalCount",state.goals.length);
+  set("flowBalance",money(income-expense));set("insightIncome",money(income));set("insightExpense",money(expense));
+  if($("#taskRateBar"))$("#taskRateBar").style.width=taskRate+"%";
+  if($("#goalRateBar"))$("#goalRateBar").style.width=goalRate+"%";
+  const max=Math.max(income,expense,1);
+  if($("#incomeBar"))$("#incomeBar").style.width=Math.round(income/max*100)+"%";
+  if($("#expenseBar"))$("#expenseBar").style.width=Math.round(expense/max*100)+"%";
+  if($("#healthGrid"))$("#healthGrid").innerHTML=[
+    ["Tasks",total?taskRate+"% complete":"No tasks yet",taskRate>=70?"On track":"Needs attention"],
+    ["Goals",state.goals.length?goalRate+"% average":"No goals yet",goalRate>=70?"Strong momentum":"Keep moving"],
+    ["Exams",state.exams.length+" planned",state.exams.length?"Planned":"Clear"],
+    ["Notes",state.notes.length+" saved",state.notes.length?"Captured":"Empty"]
+  ].map(([a,b,c])=>'<div class="health-item"><span>'+esc(a)+'</span><b>'+esc(b)+'</b><small>'+esc(c)+"</small></div>").join("");
+}
+function render(){
+  const openTasks=state.tasks.filter(x=>!x.done);
+  const avgGoal=state.goals.length?Math.round(state.goals.reduce((sum,x)=>sum+(Number(x.progress)||0),0)/state.goals.length):0;
+  const income=state.finance.filter(x=>x.type==="income").reduce((sum,x)=>sum+(Number(x.amount)||0),0);
+  const expense=state.finance.filter(x=>x.type==="expense").reduce((sum,x)=>sum+(Number(x.amount)||0),0);
+  $("#sTasks").textContent=openTasks.length;$("#sGoals").textContent=avgGoal+"%";$("#sExams").textContent=state.exams.length;$("#sBalance").textContent=money(income-expense);
+
+  $("#homeTasks").innerHTML=openTasks.slice(0,5).map(x=>'<div class="item"><div><b>'+esc(x.title)+'</b><small>'+esc(x.priority||"medium")+(x.date?" · "+esc(x.date):"")+"</small></div></div>").join("")||empty("No open tasks. Nice and clear.");
+  const exams=state.exams.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  $("#homeExams").innerHTML=exams.slice(0,5).map(x=>'<div class="item"><div><b>'+esc(x.subject)+'</b><small>'+esc(x.name)+" · "+esc(x.date)+"</small></div></div>").join("")||empty("No upcoming exams.");
+
+  const query=($("#taskSearch")?.value||"").toLowerCase(), filter=$("#taskFilter")?.value||"all";
+  const tasks=state.tasks.filter(x=>(filter==="all"||(filter==="open"&&!x.done)||(filter==="done"&&x.done))&&(x.title||"").toLowerCase().includes(query));
+  $("#taskList").innerHTML=tasks.map(x=>{
+    const i=state.tasks.indexOf(x);
+    return '<div class="row"><input class="check" type="checkbox" data-check="'+i+'" '+(x.done?"checked":"")+'><div class="row-main '+(x.done?"done":"")+'"><b>'+esc(x.title)+'</b><small>'+esc(x.priority||"medium")+(x.date?" · "+esc(x.date):"")+'</small></div><div class="row-actions"><button type="button" data-edit="tasks|'+i+'">Edit</button><button type="button" class="danger" data-del="tasks|'+i+'">Delete</button></div></div>';
+  }).join("")||empty("No matching tasks.");
+
+  $("#goalList").innerHTML=state.goals.map((x,i)=>'<article class="goal"><h3>'+esc(x.title)+'</h3><div class="bar"><span style="width:'+Math.min(100,Number(x.progress)||0)+'%"></span></div><div class="goal-meta"><span>Progress</span><b>'+esc(x.progress||0)+'%</b></div><div class="row-actions" style="margin-top:14px"><button type="button" data-edit="goals|'+i+'">Edit</button><button type="button" class="danger" data-del="goals|'+i+'">Delete</button></div></article>').join("")||empty("No goals yet.");
+
+  $("#examList").innerHTML=exams.map(x=>{
+    const i=state.exams.indexOf(x);
+    return '<div class="row"><div class="row-main"><b>'+esc(x.subject)+'</b><small>'+esc(x.name)+" · "+esc(x.date)+'</small></div><div class="row-actions"><button type="button" data-edit="exams|'+i+'">Edit</button><button type="button" class="danger" data-del="exams|'+i+'">Delete</button></div></div>';
+  }).join("")||empty("No exams planned.");
+
+  $("#income").textContent=money(income);$("#expense").textContent=money(expense);$("#balance").textContent=money(income-expense);
+  $("#financeList").innerHTML=state.finance.map((x,i)=>'<div class="row"><div class="row-main"><b>'+esc(x.title)+'</b><small>'+esc(x.type)+" · "+money(x.amount)+'</small></div><div class="row-actions"><button type="button" data-edit="finance|'+i+'">Edit</button><button type="button" class="danger" data-del="finance|'+i+'">Delete</button></div></div>').join("")||empty("No finance entries.");
+
+  const noteQuery=($("#noteSearch")?.value||"").toLowerCase();
+  const notes=state.notes.filter(x=>(String(x.title)+" "+String(x.body)).toLowerCase().includes(noteQuery));
+  $("#noteList").innerHTML=notes.map((x,i)=>{
+    const realIndex=state.notes.indexOf(x);
+    return '<article class="note"><span class="eyebrow">NOTE</span><h3>'+esc(x.title)+'</h3><p>'+esc(x.body)+'</p><div class="row-actions"><button type="button" data-edit="notes|'+realIndex+'">Edit</button><button type="button" class="danger" data-del="notes|'+realIndex+'">Delete</button></div></article>';
+  }).join("")||empty("No notes yet.");
+  renderInsights();
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="personal-os-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);toast("Backup exported");
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data||!["tasks","goals","exams","finance","notes"].every(k=>Array.isArray(data[k])))throw Error("invalid");
+      if(!confirm("Restore this backup? Current local data will be replaced."))return;
+      state={tasks:data.tasks,goals:data.goals,exams:data.exams,finance:data.finance,notes:data.notes};
+      persist("Backup restored");
+    }catch{toast("Invalid backup file");}
+  };
+  reader.onerror=()=>toast("Could not read backup file");
+  reader.readAsText(file);
+}
+
+$$(".nav").forEach(el=>el.onclick=()=>nav(el.dataset.page));
+$$("[data-add]").forEach(el=>el.onclick=()=>openForm(el.dataset.add));
+$$("[data-go]").forEach(el=>el.onclick=()=>nav(el.dataset.go));
+$("#quickAdd").onclick=()=>openForm("task");
+$("#close").onclick=close;
+$("#modal").onclick=e=>{if(e.target===$("#modal"))close();};
+document.addEventListener("click",e=>{
+  const del=e.target.closest("[data-del]"),edit=e.target.closest("[data-edit]");
+  if(del){const [key,index]=del.dataset.del.split("|");removeItem(key,Number(index));}
+  if(edit){const [key,index]=edit.dataset.edit.split("|");const type={tasks:"task",goals:"goal",exams:"exam",finance:"finance",notes:"note"}[key];if(type)openForm(type,Number(index));}
+});
+document.addEventListener("change",e=>{
+  if(e.target.dataset.check===undefined)return;
+  const task=state.tasks[Number(e.target.dataset.check)];if(!task)return;
+  task.done=e.target.checked;
+  if(task.done&&task.repeat&&task.repeat!=="none"){
+    const date=new Date(task.date||Date.now());
+    if(task.repeat==="daily")date.setDate(date.getDate()+1);
+    if(task.repeat==="weekly")date.setDate(date.getDate()+7);
+    if(task.repeat==="monthly")date.setMonth(date.getMonth()+1);
+    state.tasks.unshift({id:id(),createdAt:Date.now(),title:task.title,date:date.toISOString().slice(0,10),priority:task.priority,repeat:task.repeat,done:false});
+    task.repeat="none";
+  }
+  persist(e.target.checked?"Completed":"Reopened");
+});
+$("#captureBtn").onclick=()=>{
+  const value=$("#capture").value.trim();if(!value){toast("Write something first");$("#capture").focus();return;}
+  state.notes.unshift({id:id(),title:"Quick capture",body:value,createdAt:Date.now()});$("#capture").value="";persist("Captured");
+};
+$("#taskSearch").oninput=render;$("#taskFilter").onchange=render;$("#noteSearch").oninput=render;
+$("#menu").onclick=()=>$("#sidebar").classList.toggle("open");
+$("#themeBtn").onclick=()=>{const dark=document.body.classList.toggle("dark");localStorage.setItem("personalOS.dark",String(dark));toast(dark?"Dark mode on":"Light mode on");};
+$("#backupBtn").onclick=()=>safe(exportData);
+$("#importBtn").onclick=()=>$("#importFile").click();
+$("#refreshInsights").onclick=renderInsights;
+$("#importFile").onchange=e=>{const file=e.target.files?.[0];if(file)importData(file);e.target.value="";};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+if(localStorage.getItem("personalOS.dark")==="true")document.body.classList.add("dark");
+
+function tick(){
+  const d=new Date();
+  $("#clock").textContent=d.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:true});
+  $("#today").textContent=d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  $("#hello").textContent=(d.getHours()<12?"Good morning":d.getHours()<18?"Good afternoon":"Good evening")+" 👋";
+}
+setInterval(tick,1000);tick();render();
