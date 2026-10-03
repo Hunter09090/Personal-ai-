@@ -34,3 +34,23 @@ button:focus-visible,.nav:focus-visible,input:focus-visible,select:focus-visible
 @media(max-width:1000px){.sidebar{border-right:1px solid rgba(255,255,255,.06)}}
 @media(max-width:600px){.top-left small{display:none}.content{animation:none}.row-actions{flex-wrap:wrap}.row-actions button,.mini-btn{min-height:34px}.modal{padding:12px}.modal-box{padding:22px}.hero-actions .primary,.hero-actions .hero-link{min-height:42px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* PREMIUM V7 — command center experience */
+:root{--radius-xl:24px}
+.hero-actions .hero-link{border-radius:10px;transition:.18s ease}
+.hero-actions .hero-link:hover{background:rgba(109,93,252,.08);transform:translateY(-1px)}
+.focus-mode .sidebar,.focus-mode .topbar{display:none}.focus-mode .main{margin-left:0}.focus-mode .content{max-width:1180px;padding-top:42px}.focus-mode .hero{min-height:310px}
+.command-palette{position:fixed;inset:0;background:rgba(5,8,20,.58);backdrop-filter:blur(10px);display:grid;place-items:start center;padding:12vh 18px;z-index:100}
+.command-box{width:min(680px,100%);background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 35px 100px rgba(0,0,0,.28);overflow:hidden}
+.command-search{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.command-search span{color:var(--accent);font-weight:900}.command-search input{border:0!important;box-shadow:none!important;background:transparent!important;padding:0!important;font-size:16px}
+.command-list{max-height:55vh;overflow:auto;padding:8px}.command-item{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:transparent;color:var(--text);padding:13px 14px;border-radius:11px}.command-item:hover,.command-item.active{background:var(--soft)}.command-item b{font-size:13px}.command-item small{display:block;color:var(--muted);margin-top:2px}
+.command-key{margin-left:auto;border:1px solid var(--line);border-radius:6px;padding:3px 6px;color:var(--muted);font-size:10px}
+.command-foot{padding:10px 16px;color:var(--muted);font-size:10px;border-top:1px solid var(--line)}
+.shortcut-hint{font-size:10px;color:var(--muted);margin-left:5px}
+.focus-banner{display:none}.focus-mode .focus-banner{display:flex}
+.focus-banner{align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;margin-bottom:14px;background:rgba(109,93,252,.08);border:1px solid rgba(109,93,252,.16);border-radius:14px;color:var(--text);font-size:12px}
+.focus-banner button{background:transparent;color:var(--accent);font-weight:800}
+.icon-svg{width:17px;height:17px;display:block;flex:none}
+.nav span,.side-btn span{width:24px}
+@media(max-width:600px){.command-palette{padding:7vh 10px}.command-box{border-radius:16px}.focus-mode .content{padding-top:18px}.focus-mode .hero{min-height:auto}}
