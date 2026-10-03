@@ -1,9 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore,collection,addDoc,deleteDoc,updateDoc,doc,onSnapshot,query,orderBy,serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-const firebaseConfig={apiKey:"AIzaSyCymBHHTJobUogVnBCuSyYJlorMwkZN53E",authDomain:"new-ai-19692.firebaseapp.com",projectId:"new-ai-19692",storageBucket:"new-ai-19692.firebasestorage.app",messagingSenderId:"215456596142",appId:"1:215456596142:web:582e41fc1e7359bba32d3f",measurementId:"G-886M5V7BTD"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);
 const state={tasks:[],study:[],exams:[],results:[],attendance:[],finance:[],notes:[]},unsub={};
 let globalQuery="";
@@ -14,29 +9,23 @@ const names=Object.keys(state);
 let modalMode="add",modalType="",modalId="";
 const actionTypeMap={"add-task":"tasks","add-study":"study","add-exam":"exams","add-result":"results","add-attendance":"attendance","add-finance":"finance","add-note":"notes"};
 
-function msg(x){$("authMessage").textContent=x||""}
-function err(e){const map={"auth/invalid-email":"সঠিক Email address দিন।","auth/missing-password":"Password দিন।","auth/invalid-credential":"Email অথবা Password সঠিক নয়।","auth/user-not-found":"এই Email দিয়ে কোনো account পাওয়া যায়নি। আগে Create account করুন।","auth/wrong-password":"Password সঠিক নয়।","auth/email-already-in-use":"এই Email দিয়ে account আগে থেকেই আছে। Sign in করুন।","auth/weak-password":"Password কমপক্ষে 6 অক্ষরের হতে হবে।","auth/operation-not-allowed":"Firebase Authentication-এ এই sign-in method চালু করা হয়নি।","auth/unauthorized-domain":"এই website domain Firebase Authentication-এর Authorized domains-এ যোগ করুন।","auth/network-request-failed":"Internet connection সমস্যা হয়েছে। আবার চেষ্টা করুন।"};return map[e?.code]||e?.message||"কাজটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।"}
-$("emailLoginBtn").onclick=async()=>{msg("");const email=$("email").value.trim(),password=$("password").value;if(!email||!password){msg("Email এবং Password দুটোই দিন।");return}try{await signInWithEmailAndPassword(auth,email,password)}catch(e){msg(err(e))}};
-$("registerBtn").onclick=async()=>{const email=$("email").value.trim(),password=$("password").value;if(!email){msg("Email address দিন।");return}if(password.length<6){msg("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");return}try{await createUserWithEmailAndPassword(auth,email,password)}catch(e){msg(err(e))}};
-$("logoutBtn").onclick=()=>signOut(auth);
-$("saveGeminiKey")?.addEventListener("click",()=>{const k=$("geminiKey").value.trim();if(!k){$("uxToast").textContent="Enter a Gemini API key first.";return}localStorage.setItem(GEMINI_KEY_STORAGE,k);$("uxToast").textContent="Gemini key saved on this browser.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast")?.classList.remove("show"),1800)});
-$("actionPlan")?.addEventListener("click",runAIAction);
-$("actionConfirm")?.addEventListener("click",confirmAIAction);
-$("actionCancel")?.addEventListener("click",cancelAIAction);
-$("clearGeminiKey")?.addEventListener("click",()=>{localStorage.removeItem(GEMINI_KEY_STORAGE);$("geminiKey").value="";$("uxToast").textContent="Gemini key cleared.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast")?.classList.remove("show"),1800)});
-window.addEventListener("load",()=>{if($("geminiKey"))$("geminiKey").value=getGeminiKey()});
-function ref(n){return collection(db,"users",auth.currentUser.uid,n)}
-function add(n,d){return addDoc(ref(n),{...d,createdAt:serverTimestamp()})}
-function del(n,id){return deleteDoc(doc(db,"users",auth.currentUser.uid,n,id))}
-function patch(n,id,d){return updateDoc(doc(db,"users",auth.currentUser.uid,n,id),d)}
+const LOCAL_KEY="personalWorkspaceLocalDataV2";
+function localLoad(){try{const saved=JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}");Object.keys(state).forEach(n=>state[n]=Array.isArray(saved[n])?saved[n]:[])}catch(e){console.error("Local data load failed",e)}}
+function localSave(){localStorage.setItem(LOCAL_KEY,JSON.stringify(state))}
+function err(e){return e?.message||"কাজটি সম্পন্ন করা যায়নি।"}
+function add(n,d){const item={...d,id:"local-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),createdAt:new Date().toISOString()};state[n]=[item,...state[n]];localSave();render();return Promise.resolve(item)}
+function del(n,id){state[n]=state[n].filter(x=>x.id!==id);localSave();render();return Promise.resolve()}
+function patch(n,id,d){state[n]=state[n].map(x=>x.id===id?{...x,...d}:x);localSave();render();return Promise.resolve()}
 function money(n){return "৳"+Number(n||0).toLocaleString("en-BD")}
 function date(v){if(!v)return "";const d=new Date(v+"T00:00:00");return isNaN(d)?"":d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]||c))}
 function statusClass(v){return "status-"+String(v||"").toLowerCase()}
 function priorityClass(v){return "priority-"+String(v||"medium").toLowerCase()}
 
-onAuthStateChanged(auth,u=>{if(!u){$("loginPage").classList.remove("hidden");$("dashboardPage").classList.add("hidden");Object.keys(unsub).forEach(k=>unsub[k]?.());return}$("loginPage").classList.add("hidden");$("dashboardPage").classList.remove("hidden");$("welcomeText").textContent="Good "+(new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening")+", "+(u.displayName||u.email.split("@")[0])+" 👋";$("userBadge").textContent=(u.displayName||u.email)[0].toUpperCase();names.forEach(sub)});
-function sub(n){if(unsub[n])unsub[n]();unsub[n]=onSnapshot(query(ref(n),orderBy("createdAt","desc")),s=>{state[n]=s.docs.map(d=>({id:d.id,...d.data()}));render()},e=>console.error(n,e))}
+localLoad();
+$("welcomeText").textContent="Good "+(new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening")+", Akter 👋";
+$("userBadge").textContent="A";
+render();
 
 const schema={tasks:[["title","Task title","text",1],["date","Date","date"],["time","Time","time"],["priority","Priority","select:low,medium,high"],["category","Category","select:personal,study,work,important"]],study:[["subject","Subject","text",1],["target","Goal","text"],["progress","Progress %","number"],["status","Status","select:Active,Paused,Completed"]],exams:[["exam","Exam name","text",1],["subject","Subject","text",1],["date","Date","date",1],["time","Time","time"],["status","Status","select:Planned,Preparing,Completed"]],results:[["exam","Exam","text"],["subject","Subject","text",1],["marks","Marks","number",1],["total","Total","number",1],["date","Date","date"]],attendance:[["date","Date","date",1],["subject","Subject","text"],["status","Status","select:Present,Absent,Leave"]],finance:[["title","Description","text",1],["amount","Amount BDT","number",1],["type","Type","select:income,expense"],["category","Category","text"],["date","Date","date"]],notes:[["title","Title","text",1],["category","Category","select:Idea,Plan,Work,Study,Personal"],["body","Note","textarea",1]]};
 function validate(type,d){for(const f of schema[type])if(f[3]&&!String(d[f[0]]||"").trim())return f[1]+" পূরণ করুন।";if(type==="study"&&(Number(d.progress)<0||Number(d.progress)>100))return "Progress 0 থেকে 100-এর মধ্যে দিন।";if(type==="results"&&(Number(d.marks)<0||Number(d.total)<=0||Number(d.marks)>Number(d.total)))return "Marks/Total সঠিকভাবে দিন। Marks Total-এর বেশি হতে পারবে না।";if(type==="finance"&&Number(d.amount)<0)return "Amount 0 বা তার বেশি হতে হবে।";return ""}
