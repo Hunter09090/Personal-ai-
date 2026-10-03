@@ -207,3 +207,53 @@ $("#reminderBtn")?.addEventListener("click",async()=>{if(!("Notification" in win
 $("#globalSearch")?.addEventListener("input",e=>{const q=e.target.value.trim().toLowerCase();if(!q)return;const all=[...state.tasks.map(x=>"Task: "+x.title),...state.goals.map(x=>"Goal: "+x.title),...state.exams.map(x=>"Exam: "+x.subject),...state.notes.map(x=>"Note: "+x.title),...state.study.map(x=>"Study: "+x.topic)];const hit=all.filter(x=>x.toLowerCase().includes(q));toast(hit.length?hit.slice(0,3).join(" • "):"No matches")});
 if($("#reminderStatus")&&localStorage.getItem("personalOS.reminders")==="granted")$("#reminderStatus").textContent="Reminders enabled";
 renderCalendar();renderStudy();updateStorage();
+/* V7 interaction layer */
+(function(){
+  const icons={
+    home:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg>',
+    task:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/><path d="M4 4h16v16H4z" opacity=".35"/></svg>',
+    goal:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
+    exam:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>',
+    finance:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h12v16H6z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+    note:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v12l-4 4H5z"/><path d="M9 9h6M9 13h4"/></svg>',
+    insights:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 19V9M12 19V5M19 19v-8"/><path d="M3 19h18"/></svg>',
+    calendar:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>',
+    study:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 6 8-3 8 3-8 3-8-3Z"/><path d="M6 9v6c2 2 10 2 12 0V9M20 7v8"/></svg>',
+    settings:'<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.5-1H6v-2.4h.2a1.7 1.7 0 0 0 1.5-1A1.7 1.7 0 0 0 8.1 9L8 8.9l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V6h2.4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2v2.4h-.2a1.7 1.7 0 0 0-1.5.6Z"/></svg>'
+  };
+  const navMap={home:'home',tasks:'task',goals:'goal',exams:'exam',finance:'finance',notes:'note',insights:'insights',calendar:'calendar',study:'study',settings:'settings'};
+  $$('.nav').forEach(el=>{const s=el.querySelector('span');if(s&&icons[navMap[el.dataset.page]])s.innerHTML=icons[navMap[el.dataset.page]];});
+  const focusBtn=$('#focusBtn');
+  if(focusBtn){
+    focusBtn.onclick=()=>{document.body.classList.toggle('focus-mode');focusBtn.textContent=document.body.classList.contains('focus-mode')?'Exit focus mode':'Focus mode';toast(document.body.classList.contains('focus-mode')?'Focus mode on':'Focus mode off');};
+  }
+  const banner=document.createElement('div');banner.className='focus-banner';banner.innerHTML='<span><b>Focus mode</b> — distraction-free workspace. Press Esc to exit.</span><button type="button">Exit</button>';banner.querySelector('button').onclick=()=>{document.body.classList.remove('focus-mode');if(focusBtn)focusBtn.textContent='Focus mode';};$('.content').prepend(banner);
+
+  const palette=document.createElement('div');palette.className='command-palette hidden';palette.setAttribute('role','dialog');palette.setAttribute('aria-modal','true');palette.innerHTML='<div class="command-box"><div class="command-search"><span>⌕</span><input aria-label="Command search" placeholder="Search actions…"></div><div class="command-list"></div><div class="command-foot">↑↓ navigate · Enter select · Esc close · Ctrl/Cmd + K open</div></div>';document.body.appendChild(palette);
+  const pInput=palette.querySelector('input'),pList=palette.querySelector('.command-list');
+  const commands=[
+    ['Add task','Create a new task','task'],['Add goal','Create a new goal','goal'],['Add exam','Plan an exam','exam'],['Add finance entry','Record income or expense','finance'],['New note','Capture a note','note'],['Add study session','Plan focused study','study'],
+    ['Today / Overview','Open command center','nav:home'],['Insights','View personal analytics','nav:insights'],['Calendar','Open monthly calendar','nav:calendar'],['Study Planner','Open study planner','nav:study'],['Settings','Open controls and data','nav:settings'],['Focus mode','Toggle distraction-free mode','focus']
+  ];
+  let active=0,filtered=commands;
+  function drawCommands(){
+    const q=pInput.value.trim().toLowerCase();filtered=commands.filter(c=>(c[0]+' '+c[1]).toLowerCase().includes(q));active=Math.min(active,Math.max(0,filtered.length-1));
+    pList.innerHTML=filtered.map((c,i)=>'<button type="button" class="command-item '+(i===active?'active':'')+'" data-command="'+esc(c[2])+'">'+(icons[c[2]]||'✦')+'<span><b>'+esc(c[0])+'</b><small>'+esc(c[1])+'</small></span>'+(i===0&&q===''?'<span class="command-key">Enter</span>':'')+'</button>').join('')||'<div class="empty-state">No actions found.</div>';
+  }
+  function openPalette(){palette.classList.remove('hidden');pInput.value='';active=0;drawCommands();setTimeout(()=>pInput.focus(),0);}
+  function closePalette(){palette.classList.add('hidden');}
+  function runCommand(c){
+    if(c==='focus'){focusBtn?.click();return;}
+    if(c.startsWith('nav:')){nav(c.slice(4));return;}
+    openForm(c);
+  }
+  pList.addEventListener('click',e=>{const item=e.target.closest('[data-command]');if(item){runCommand(item.dataset.command);closePalette();}});
+  pInput.addEventListener('input',drawCommands);
+  pInput.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();active=Math.min(active+1,filtered.length-1);drawCommands()}else if(e.key==='ArrowUp'){e.preventDefault();active=Math.max(active-1,0);drawCommands()}else if(e.key==='Enter'){e.preventDefault();if(filtered[active]){runCommand(filtered[active][2]);closePalette()}}});
+  palette.addEventListener('click',e=>{if(e.target===palette)closePalette();});
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();}
+    if(e.key==='Escape'&&document.body.classList.contains('focus-mode')&&!editing){document.body.classList.remove('focus-mode');if(focusBtn)focusBtn.textContent='Focus mode';}
+    if(!editing&&palette.classList.contains('hidden')&&(e.key==='n'||e.key==='N')){ if(!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();openForm('task');} }
+  });
+})();
