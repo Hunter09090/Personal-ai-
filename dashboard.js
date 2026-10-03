@@ -28,7 +28,7 @@ const cfg={
  exam:["New exam",[["name","Exam name","text",true],["subject","Subject","text",true],["date","Date","date",true]]],
  finance:["New finance entry",[["title","Description","text",true],["amount","Amount","number",true],["type","Type","select","income,expense"]]],
  note:["New note",[["title","Title","text",true],["body","Note","textarea",true],["category","Category","select","Personal,Study,Work,Idea,Important"],["tags","Tags","text",false]]],
- study:["New study session",[["subject","Subject","text",true],["topic","Topic / chapter","text",true],["date","Date","date",true],["duration","Minutes","number",true],["type","Type","select","Study,Revision,Practice"]]
+ study:["New study session",[["subject","Subject","text",true],["topic","Topic / chapter","text",true],["date","Date","date",true],["duration","Minutes","number",true],["type","Type","select","Study,Revision,Practice"]]]
 };
 let editing=null;
 
