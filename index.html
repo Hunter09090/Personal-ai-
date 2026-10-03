@@ -2,41 +2,52 @@
 <html lang="bn">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1220"><link rel="manifest" href="./manifest.webmanifest">
-<link rel="stylesheet" href="./style.css"><title>Personal OS</title>
+<meta name="theme-color" content="#0b1220"><meta name="description" content="A private, offline-first personal command center.">
+<link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><title>Personal OS — Command Center</title>
 </head>
 <body>
-<div class="app">
+<div class="app-shell">
 <aside class="sidebar" id="sidebar">
-  <div class="brand"><div class="logo">P</div><div><b>Personal OS</b><small>Your life, organized.</small></div></div>
-  <nav>
-    <button class="nav active" data-page="home">⌂ <span>Overview</span></button>
-    <button class="nav" data-page="tasks">✓ <span>Tasks</span></button>
-    <button class="nav" data-page="goals">◎ <span>Goals</span></button>
-    <button class="nav" data-page="exams">▣ <span>Exams</span></button>
-    <button class="nav" data-page="finance">৳ <span>Finance</span></button>
-    <button class="nav" data-page="notes">✦ <span>Notes</span></button>
+  <div class="brand"><div class="logo">P</div><div><strong>Personal OS</strong><small>Command Center</small></div></div>
+  <div class="workspace-label">WORKSPACE</div>
+  <nav class="nav-list">
+    <button class="nav active" data-page="home"><span>⌂</span>Overview</button>
+    <button class="nav" data-page="tasks"><span>✓</span>Tasks</button>
+    <button class="nav" data-page="goals"><span>◎</span>Goals</button>
+    <button class="nav" data-page="exams"><span>▣</span>Exams</button>
+    <button class="nav" data-page="finance"><span>৳</span>Finance</button>
+    <button class="nav" data-page="notes"><span>✦</span>Notes</button>
   </nav>
-  <div class="side-bottom"><button id="themeBtn">☼ <span>Appearance</span></button><small>Offline-first • Private</small></div>
+  <div class="sidebar-footer"><button id="themeBtn" class="side-btn"><span>◐</span>Appearance</button><small>Private • Offline-first</small></div>
 </aside>
-<main>
-<header class="topbar"><button class="menu" id="menu">☰</button><div><strong id="pageTitle">Overview</strong><small id="today"></small></div><div class="top-actions"><button id="quickAdd" class="primary">＋ Quick add</button></div></header>
+<main class="main">
+<header class="topbar">
+  <div class="top-left"><button class="menu" id="menu">☰</button><div><strong id="pageTitle">Overview</strong><small id="today"></small></div></div>
+  <div class="top-actions"><button class="icon-btn" id="backupBtn" title="Export backup">↓</button><button class="icon-btn" id="importBtn" title="Restore backup">↑</button><button class="icon-btn" id="importBtn" title="Restore backup">↑</button><button class="primary" id="quickAdd">＋ Quick add</button></div>
+</header>
 <section class="content">
 <div class="page active" id="home">
-  <div class="hero"><div><span class="eyebrow">YOUR PERSONAL COMMAND CENTER</span><h1 id="hello">Good day 👋</h1><p>এক জায়গা থেকে আজকের কাজ, পড়াশোনা, পরীক্ষা আর টাকা-পয়সা গুছিয়ে রাখুন।</p></div><div class="hero-clock" id="clock">--:--</div></div>
-  <div class="stats"><article><small>Open tasks</small><b id="sTasks">0</b><span>আজ যা বাকি</span></article><article><small>Goal progress</small><b id="sGoals">0%</b><span>সব goals-এর গড়</span></article><article><small>Upcoming exams</small><b id="sExams">0</b><span>সংরক্ষিত পরীক্ষা</span></article><article><small>Balance</small><b id="sBalance">৳0</b><span>এই workspace</span></article></div>
-  <div class="grid2"><section class="card"><div class="card-head"><div><small>FOCUS</small><h2>Today’s priorities</h2></div><button class="ghost" data-go="tasks">View all →</button></div><div id="homeTasks" class="list"></div></section>
-  <section class="card"><div class="card-head"><div><small>NEXT UP</small><h2>Upcoming exams</h2></div><button class="ghost" data-go="exams">View all →</button></div><div id="homeExams" class="list"></div></section></div>
-  <section class="card"><div class="card-head"><div><small>QUICK CAPTURE</small><h2>Write it down</h2></div></div><div class="capture"><input id="capture" placeholder="কোনো idea, কাজ বা reminder লিখুন…"><button class="primary" id="captureBtn">Save note</button></div></section>
+  <section class="hero"><div><span class="eyebrow">PERSONAL COMMAND CENTER</span><h1 id="hello">Good day 👋</h1><p>কাজ, লক্ষ্য, পড়াশোনা, পরীক্ষা ও অর্থ—সবকিছু এক জায়গায়, শান্তভাবে নিয়ন্ত্রণ করুন।</p><div class="hero-actions"><button class="primary light" data-add="task">＋ New task</button><button class="hero-link" data-go="notes">Capture an idea →</button></div></div><div class="hero-side"><div class="clock" id="clock">--:--</div><span>LOCAL TIME</span></div></section>
+  <div class="stats">
+    <article><div class="stat-icon">✓</div><small>Open tasks</small><b id="sTasks">0</b><span>remaining</span></article>
+    <article><div class="stat-icon">◎</div><small>Goal progress</small><b id="sGoals">0%</b><span>average completion</span></article>
+    <article><div class="stat-icon">▣</div><small>Upcoming exams</small><b id="sExams">0</b><span>planned</span></article>
+    <article><div class="stat-icon">৳</div><small>Balance</small><b id="sBalance">৳0</b><span>current workspace</span></article>
+  </div>
+  <div class="dashboard-grid">
+    <section class="card"><div class="card-head"><div><span class="eyebrow">FOCUS</span><h2>Today’s priorities</h2></div><button class="text-btn" data-go="tasks">View all →</button></div><div id="homeTasks" class="list"></div></section>
+    <section class="card"><div class="card-head"><div><span class="eyebrow">NEXT UP</span><h2>Upcoming exams</h2></div><button class="text-btn" data-go="exams">View all →</button></div><div id="homeExams" class="list"></div></section>
+  </div>
+  <section class="card"><div class="card-head"><div><span class="eyebrow">QUICK CAPTURE</span><h2>Clear your head</h2></div></div><div class="capture"><input id="capture" placeholder="Idea, reminder, thought or anything worth remembering…"><button class="primary" id="captureBtn">Save note</button></div></section>
 </div>
-<div class="page" id="tasks"><div class="page-head"><div><span class="eyebrow">TASK MANAGER</span><h1>Tasks</h1><p>ছোট কাজগুলোকে পরিষ্কারভাবে এগিয়ে নিন।</p></div><button class="primary" data-add="task">＋ Add task</button></div><div class="toolbar"><input id="taskSearch" placeholder="Search tasks…"><select id="taskFilter"><option value="all">All</option><option value="open">Open</option><option value="done">Completed</option></select></div><div id="taskList" class="stack"></div></div>
-<div class="page" id="goals"><div class="page-head"><div><span class="eyebrow">PROGRESS</span><h1>Goals</h1><p>যে জিনিসগুলো সত্যিই শেষ করতে চান।</p></div><button class="primary" data-add="goal">＋ Add goal</button></div><div id="goalList" class="cards"></div></div>
-<div class="page" id="exams"><div class="page-head"><div><span class="eyebrow">PLANNING</span><h1>Exams</h1><p>তারিখ ও প্রস্তুতি এক নজরে।</p></div><button class="primary" data-add="exam">＋ Add exam</button></div><div id="examList" class="stack"></div></div>
-<div class="page" id="finance"><div class="page-head"><div><span class="eyebrow">MONEY</span><h1>Finance</h1><p>আয়-ব্যয়ের সহজ হিসাব।</p></div><button class="primary" data-add="finance">＋ Add entry</button></div><div class="stats mini"><article><small>Income</small><b id="income">৳0</b></article><article><small>Expense</small><b id="expense">৳0</b></article><article><small>Balance</small><b id="balance">৳0</b></article></div><div id="financeList" class="stack"></div></div>
-<div class="page" id="notes"><div class="page-head"><div><span class="eyebrow">SECOND BRAIN</span><h1>Notes</h1><p>আইডিয়া হারিয়ে যাওয়ার আগেই ধরে রাখুন।</p></div><button class="primary" data-add="note">＋ New note</button></div><div id="noteList" class="notes"></div></div>
+<div class="page" id="tasks"><div class="page-head"><div><span class="eyebrow">TASK MANAGER</span><h1>Tasks</h1><p>Turn intentions into clear next actions.</p></div><button class="primary" data-add="task">＋ Add task</button></div><div class="toolbar"><div class="search"><span>⌕</span><input id="taskSearch" placeholder="Search tasks…"></div><select id="taskFilter"><option value="all">All tasks</option><option value="open">Open</option><option value="done">Completed</option></select></div><div id="taskList" class="stack"></div></div>
+<div class="page" id="goals"><div class="page-head"><div><span class="eyebrow">PROGRESS</span><h1>Goals</h1><p>Keep the important things moving forward.</p></div><button class="primary" data-add="goal">＋ Add goal</button></div><div id="goalList" class="cards"></div></div>
+<div class="page" id="exams"><div class="page-head"><div><span class="eyebrow">PLANNING</span><h1>Exams</h1><p>Keep every important date visible.</p></div><button class="primary" data-add="exam">＋ Add exam</button></div><div id="examList" class="stack"></div></div>
+<div class="page" id="finance"><div class="page-head"><div><span class="eyebrow">MONEY</span><h1>Finance</h1><p>A simple view of income, spending and balance.</p></div><button class="primary" data-add="finance">＋ Add entry</button></div><div class="stats mini"><article><small>Income</small><b id="income">৳0</b></article><article><small>Expense</small><b id="expense">৳0</b></article><article><small>Balance</small><b id="balance">৳0</b></article></div><div id="financeList" class="stack"></div></div>
+<div class="page" id="notes"><div class="page-head"><div><span class="eyebrow">SECOND BRAIN</span><h1>Notes</h1><p>Save ideas before they disappear.</p></div><button class="primary" data-add="note">＋ New note</button></div><div class="notes-toolbar"><div class="search"><span>⌕</span><input id="noteSearch" placeholder="Search notes…"></div></div><div id="noteList" class="notes"></div></div>
 </section></main></div>
-<div class="modal hidden" id="modal"><div class="modal-box"><button class="modal-x" id="close">×</button><span class="eyebrow">NEW ENTRY</span><h2 id="modalTitle">Add</h2><form id="form"></form></div></div>
+<div class="modal hidden" id="modal"><div class="modal-box"><button class="modal-x" id="close">×</button><span class="eyebrow" id="modalEyebrow">NEW ENTRY</span><h2 id="modalTitle">Add</h2><form id="form"></form></div></div>
 <div class="toast" id="toast"></div>
-<script type="module" src="./dashboard.js"></script>
-<script>if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script>
+<input type="file" id="importFile" accept="application/json" hidden>
+<script type="module" src="./dashboard.js"></script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script>
 </body></html>
