@@ -75,3 +75,28 @@ input::placeholder,textarea::placeholder{color:#7b8798;opacity:1}
 .dark .search,.dark .global-search{background:#101827;border-color:var(--line)}.dark .search span,.dark .global-search span{color:#a8b1c2}
 .dark input::placeholder,.dark textarea::placeholder{color:#7f8ba0}.dark .hero{color:var(--text)}.dark .cal-day{color:var(--text);background:#111827}.dark .weekdays{color:#a8b1c2}
 .dark .row-actions button,.dark .mini-btn{color:#e5e7eb}
+
+/* COLOR V9 — high-contrast, comfortable light + night themes */
+:root{--text:#182230;--muted:#526071;--line:#d6dde7;--soft:#edf1f6;--accent:#4f46e5;--accent2:#6d5dfc;--success:#087443;--danger:#b42318}
+body{color:var(--text);background:#f6f8fb}
+.topbar,.page-head,.card,.goal,.note,.row,.stats article,.calendar-card,.modal-box,.command-box{color:var(--text)}
+.topbar strong,.page-head h1,.card h2,.goal h3,.note h3,.row-main b,.stats b,.item b,.big-metric{color:#182230}
+.topbar small,.page-head p,.hero p,.setting-muted,.row-main small,.item small,.goal-meta,.stats small,.stats span,.health-item span,.health-item small,.note p,.weekdays,.empty-state,.shortcut-hint{color:#526071}
+input,select,textarea,.search,.global-search{color:#182230;background:#fff;border-color:#cfd7e3}
+input::placeholder,textarea::placeholder{color:#697789}.search span,.global-search span{color:#526071}
+.row-actions button,.mini-btn,.icon-btn{color:#344054;background:#edf1f6}.row-actions .danger{color:#b42318}
+.cal-day{color:#182230;background:#f8fafc;border-color:#d6dde7}.cal-day b{color:#182230}.cal-event{color:#344054;background:#e9eef5}
+.cal-event.exam{color:#b42318;background:#fff1f0}.cal-event.goal{color:#087443;background:#ecfdf3}.weekdays{color:#526071}
+.hero{color:#182230;background:linear-gradient(135deg,#fff,#f3f1ff)}.hero h1{color:#182230}.hero p{color:#526071}.hero .eyebrow,.eyebrow{color:#4f46e5}.hero-link,.text-btn{color:#4338ca}
+.command-item{color:#182230}.command-item small,.command-key,.command-foot{color:#526071}.modal-box label{color:#344054}.focus-banner{color:#182230}
+body.dark{--bg:#080d17;--surface:#101827;--surface2:#141d2d;--text:#f7f8fc;--muted:#b7c1d1;--line:#2b374b;--soft:#1b2638;--accent:#9b8cff;--accent2:#b0a4ff;--success:#4ade80;--danger:#ff7b72;background:#080d17;color:#f7f8fc}
+body.dark .topbar,body.dark .page-head,body.dark .card,body.dark .goal,body.dark .note,body.dark .row,body.dark .stats article,body.dark .calendar-card,body.dark .modal-box,body.dark .command-box{color:#f7f8fc;border-color:#2b374b}
+body.dark .topbar strong,body.dark .page-head h1,body.dark .card h2,body.dark .goal h3,body.dark .note h3,body.dark .row-main b,body.dark .stats b,body.dark .item b,body.dark .big-metric{color:#f7f8fc}
+body.dark .topbar small,body.dark .page-head p,body.dark .hero p,body.dark .setting-muted,body.dark .row-main small,body.dark .item small,body.dark .goal-meta,body.dark .stats small,body.dark .stats span,body.dark .health-item span,body.dark .health-item small,body.dark .note p,body.dark .weekdays,body.dark .empty-state,body.dark .shortcut-hint{color:#b7c1d1}
+body.dark input,body.dark select,body.dark textarea,body.dark .search,body.dark .global-search{color:#f7f8fc;background:#0d1523;border-color:#2b374b}body.dark input::placeholder,body.dark textarea::placeholder{color:#8491a5}
+body.dark .search span,body.dark .global-search span{color:#b7c1d1}.dark .row-actions button,.dark .mini-btn,.dark .icon-btn{color:#e8ecf4;background:#1b2638;border-color:#2b374b}.dark .row-actions .danger{color:#ff9a93}
+body.dark .cal-day{color:#f7f8fc;background:#111a29;border-color:#2b374b}body.dark .cal-day b{color:#f7f8fc}.dark .cal-event{color:#dbe3ef;background:#1b2638}
+body.dark .cal-event.exam{color:#ff9a93;background:rgba(240,68,56,.13)}body.dark .cal-event.goal{color:#6ee7a0;background:rgba(18,183,106,.13)}
+body.dark .hero{color:#f7f8fc;background:linear-gradient(135deg,#151d30,#211d3b)}body.dark .hero h1{color:#f7f8fc}body.dark .hero p{color:#b7c1d1}
+body.dark .hero .eyebrow,body.dark .eyebrow,body.dark .hero-link,body.dark .text-btn{color:#b0a4ff}.dark .command-item{color:#f7f8fc}.dark .command-item small,.dark .command-key,.dark .command-foot{color:#b7c1d1}
+body.dark .modal-box label{color:#dbe3ef}body.dark .focus-banner{color:#f7f8fc}body.dark .empty-state{background:#111a29}
