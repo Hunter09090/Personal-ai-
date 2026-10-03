@@ -254,6 +254,6 @@ renderCalendar();renderStudy();updateStorage();
   document.addEventListener('keydown',e=>{
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();}
     if(e.key==='Escape'&&document.body.classList.contains('focus-mode')&&!editing){document.body.classList.remove('focus-mode');if(focusBtn)focusBtn.textContent='Focus mode';}
-    if(!editing&&!palette.classList.contains('hidden')===false && (e.key==='n'||e.key==='N')){ if(!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();openForm('task');} }
+    if(!editing&&palette.classList.contains('hidden')&&(e.key==='n'||e.key==='N')){ if(!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();openForm('task');} }
   });
 })();
