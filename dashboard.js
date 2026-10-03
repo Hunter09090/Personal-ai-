@@ -136,9 +136,27 @@ function renderOverview(){
   $("overviewTasks").innerHTML=a.length?a.map(x=>"<div class=\"compact-row\"><span class=\"dot\"></span><div><strong>"+esc(x.title)+"</strong><small>"+esc(x.category||"personal")+(x.date?" · "+date(x.date):"")+"</small></div></div>").join(""):"<div class=\"empty-mini\">You are clear. Nice.</div>";
   $("overviewExams").innerHTML=e.length?e.map(x=>"<div class=\"compact-row\"><span class=\"date-box\">"+new Date(x.date+"T00:00:00").getDate()+"</span><div><strong>"+esc(x.subject)+"</strong><small>"+esc(x.exam)+" · "+date(x.date)+"</small></div></div>").join(""):"<div class=\"empty-mini\">No upcoming exams.</div>";
 }
+function csvEscape(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
+function downloadCSV(type){
+  const rows=state[type]||[];if(!rows.length){alert("Export করার মতো কোনো data নেই।");return}
+  const fields=Object.keys(rows[0]).filter(k=>k!=="id"&&k!=="createdAt");
+  const csv=[fields.map(csvEscape).join(","),...rows.map(r=>fields.map(k=>csvEscape(r[k])).join(","))].join("\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=type+"-"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(a.href);
+}
+function printSection(type){
+  const labels={tasks:"Tasks Report",study:"Study Center Report",exams:"Exam Planner Report",results:"Results Report",attendance:"Attendance Report",finance:"Finance Report",notes:"Notes & Memory Report"},rows=state[type]||[];
+  if(!rows.length){alert("প্রিন্ট করার মতো কোনো data নেই।");return}
+  const win=window.open("","_blank");if(!win){alert("Print window blocked. Browser popup allow করুন।");return}
+  const fields=Object.keys(rows[0]).filter(k=>k!=="id"&&k!=="createdAt");
+  win.document.write("<!doctype html><html><head><title>"+labels[type]+"</title><style>body{font-family:Arial,sans-serif;padding:28px;color:#111}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:9px;text-align:left}th{background:#f5f5f5}</style></head><body><h1>"+labels[type]+"</h1><p>Generated "+new Date().toLocaleString()+"</p><table><thead><tr>"+fields.map(f=>"<th>"+esc(f)+"</th>").join("")+"</tr></thead><tbody>"+rows.map(r=>"<tr>"+fields.map(f=>"<td>"+esc(r[f])+"</td>").join("")+"</tr>").join("")+"</tbody></table></body></html>");
+  win.document.close();win.focus();setTimeout(()=>win.print(),250);
+}
 function render(){renderOverview();renderTasks();renderStudy();renderExams();renderResults();renderAttendance();renderFinance();renderNotes()}
 
 document.addEventListener("click",e=>{
+  const ex=e.target.closest("[data-export]");if(ex){downloadCSV(ex.dataset.export);return}
+  const pr=e.target.closest("[data-print]");if(pr){printSection(pr.dataset.print);return}
   const a=e.target.closest("[data-action]");if(a)openForm(a.dataset.action.replace("add-",""));
   const edit=e.target.closest("[data-edit]");if(edit){const [n,id]=edit.dataset.edit.split("|"),item=state[n].find(x=>x.id===id);if(item)openForm(n,item)}
   const d=e.target.closest("[data-delete]");if(d&&confirm("Delete this item? This cannot be undone.")){const [n,id]=d.dataset.delete.split("|");del(n,id).catch(x=>alert(err(x)))}
