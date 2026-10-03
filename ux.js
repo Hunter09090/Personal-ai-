@@ -3,7 +3,7 @@ const uxPrefs=JSON.parse(localStorage.getItem(UX_KEY)||"{}");
 const ux=sel=>document.querySelector(sel);
 function saveUX(){localStorage.setItem(UX_KEY,JSON.stringify(uxPrefs))}
 function applyUX(){document.body.classList.toggle("compact-mode",!!uxPrefs.compact);document.body.classList.toggle("focus-mode",!!uxPrefs.focus)}
-function setOnline(){const el=ux("#connectionStatus");if(!el)return;el.textContent=navigator.onLine?"Online":"Offline";el.classList.toggle("offline",!navigator.onLine)}
+function setOnline(){const online=navigator.onLine;[ux("#connectionStatus"),ux("#settingsConnection")].forEach(el=>{if(!el)return;el.textContent=online?"Online":"Offline";el.classList.toggle("offline",!online)})}
 function openSettings(){ux("#settingsPanel")?.classList.remove("hidden")}
 function closeSettings(){ux("#settingsPanel")?.classList.add("hidden")}
 function toast(text){const t=ux("#uxToast");if(!t)return;t.textContent=text;t.classList.add("show");clearTimeout(window.__uxToast);window.__uxToast=setTimeout(()=>t.classList.remove("show"),2200)}
