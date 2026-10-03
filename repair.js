@@ -11,7 +11,7 @@ const typeByTitle={Task:"tasks","Study Goal":"study",Exam:"exams",Result:"result
 const numeric={study:["progress"],results:["marks","total"],finance:["amount"]};
 function typeFromModal(){const title=$("modalTitle")?.textContent||"";const clean=title.replace(/^(Add|Edit)\s+/i,"").trim();return typeByTitle[clean]||activeType}
 function toast(text){const t=$("uxToast");if(t){t.textContent=text;t.classList.add("show");clearTimeout(window.__repairToast);window.__repairToast=setTimeout(()=>t.classList.remove("show"),2400)}else alert(text)}
-function collectForm(form,type){const d=Object.fromEntries(new FormData(form).entries());(numeric[type]||[]).forEach(k=>{if(d[k]!==undefined)d[k]=Number(d[k])});if(type==="tasks")d.completed=false;return d}
+function collectForm(form,type,isEdit){const d=Object.fromEntries(new FormData(form).entries());(numeric[type]||[]).forEach(k=>{if(d[k]!==undefined)d[k]=Number(d[k])});if(type==="tasks"&&!isEdit)d.completed=false;return d}
 function valid(type,d){const required={tasks:["title"],study:["subject"],exams:["exam","subject","date"],results:["subject"],attendance:["date"],finance:["title","amount"],notes:["title","body"]}[type]||[];for(const k of required)if(!String(d[k]??"").trim())return "Required field পূরণ করুন।";if(type==="study"&&(d.progress<0||d.progress>100))return "Progress 0–100-এর মধ্যে দিন।";if(type==="results"&&(d.marks<0||d.total<=0||d.marks>d.total))return "Marks/Total সঠিকভাবে দিন।";if(type==="finance"&&d.amount<0)return "Amount 0 বা তার বেশি হতে হবে।";return ""}
 
 document.addEventListener("click",e=>{
@@ -22,17 +22,17 @@ document.addEventListener("click",e=>{
 document.addEventListener("submit",async e=>{
   const form=e.target;if(form.id!=="dynamicForm")return;
   const type=typeFromModal();if(!type||!auth.currentUser)return;
-  // Capture phase runs before the original onsubmit handler, preventing duplicate writes.
   e.preventDefault();e.stopImmediatePropagation();
-  const d=collectForm(form,type),problem=valid(type,d);if(problem){toast(problem);return}
+  const isEdit=!!activeId,d=collectForm(form,type,isEdit),problem=valid(type,d);if(problem){toast(problem);return}
   const btn=form.querySelector('button[type="submit"]');if(btn){btn.disabled=true;btn.textContent="Saving…"}
+  const wasEdit=isEdit;
   try{
     const base=collection(db,"users",auth.currentUser.uid,type);
-    if(activeId)await updateDoc(doc(db,"users",auth.currentUser.uid,type,activeId),d);
-    else {if(type!=="tasks")delete d.completed;await addDoc(base,{...d,createdAt:serverTimestamp()})}
-    $("modal")?.classList.add("hidden");toast(activeId?"Updated successfully":"Saved successfully");activeId="";
+    if(isEdit)await updateDoc(doc(db,"users",auth.currentUser.uid,type,activeId),d);
+    else await addDoc(base,{...d,createdAt:serverTimestamp()});
+    $("modal")?.classList.add("hidden");toast(wasEdit?"Updated successfully":"Saved successfully");activeId="";
   }catch(err){console.error("CRUD repair",err);toast("Save করা যায়নি। Internet/Firebase connection check করে আবার চেষ্টা করুন।")}
-  finally{if(btn){btn.disabled=false;btn.textContent=activeId?"Update":"Save"}}
+  finally{if(btn){btn.disabled=false;btn.textContent="Save"}}
 },true);
 
 window.addEventListener("unhandledrejection",e=>{console.error(e.reason);toast("একটি operation সম্পন্ন হয়নি। আবার চেষ্টা করুন।")});
