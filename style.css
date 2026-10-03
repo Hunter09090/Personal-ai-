@@ -54,3 +54,24 @@ button:focus-visible,.nav:focus-visible,input:focus-visible,select:focus-visible
 .icon-svg{width:17px;height:17px;display:block;flex:none}
 .nav span,.side-btn span{width:24px}
 @media(max-width:600px){.command-palette{padding:7vh 10px}.command-box{border-radius:16px}.focus-mode .content{padding-top:18px}.focus-mode .hero{min-height:auto}}
+
+/* PREMIUM V8 — contrast + intelligent daily command center */
+:root{--text:#172033;--muted:#596579;--line:#dfe4ec;--soft:#eef2f7;--accent:#5b4df5;--accent2:#7b6cff}
+body{color:var(--text)}
+.topbar strong,.page-head h1,.card h2,.goal h3,.note h3,.row-main b,.stats b{color:var(--text)}
+.page-head p,.hero p,.setting-muted,.row-main small,.item small,.goal-meta,.stats small,.stats span,.health-item span,.health-item small{color:#596579}
+.eyebrow{color:#5143d8}
+.search,.global-search{background:#fff;border-color:#d9dee8}
+.search span,.global-search span{color:#596579}
+input::placeholder,textarea::placeholder{color:#7b8798;opacity:1}
+.primary{color:#fff}.hero{color:#172033}.hero h1{color:#172033}.hero p{color:#596579}.hero .eyebrow{color:#5143d8}
+.hero-link{color:#5143d8}.hero-link:hover{color:#392dd0;background:rgba(91,77,245,.08)}.text-btn{color:#5143d8}
+.cal-day{color:#172033;background:#f8f9fc}.weekdays{color:#596579}.modal-box{color:var(--text)}.modal-box label{color:#344054}
+.row-actions button,.mini-btn{color:#344054}.row-actions .danger{color:#d92d20}.empty-state{color:#596579}
+.dark{--text:#f4f5fb;--muted:#a8b1c2;--line:#29344a;--soft:#1b2538;--accent:#8b7cff;--accent2:#a397ff}
+.dark .topbar strong,.dark .page-head h1,.dark .card h2,.dark .goal h3,.dark .note h3,.dark .row-main b,.dark .stats b,.dark .hero h1{color:var(--text)}
+.dark .page-head p,.dark .hero p,.dark .setting-muted,.dark .row-main small,.dark .item small,.dark .goal-meta,.dark .stats small,.dark .stats span,.dark .health-item span,.dark .health-item small{color:#a8b1c2}
+.dark .eyebrow,.dark .hero .eyebrow,.dark .hero-link,.dark .text-btn{color:#a397ff}
+.dark .search,.dark .global-search{background:#101827;border-color:var(--line)}.dark .search span,.dark .global-search span{color:#a8b1c2}
+.dark input::placeholder,.dark textarea::placeholder{color:#7f8ba0}.dark .hero{color:var(--text)}.dark .cal-day{color:var(--text);background:#111827}.dark .weekdays{color:#a8b1c2}
+.dark .row-actions button,.dark .mini-btn{color:#e5e7eb}

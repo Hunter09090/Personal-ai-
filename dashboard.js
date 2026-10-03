@@ -257,3 +257,29 @@ renderCalendar();renderStudy();updateStorage();
     if(!editing&&palette.classList.contains('hidden')&&(e.key==='n'||e.key==='N')){ if(!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();openForm('task');} }
   });
 })();
+
+/* V8 — intelligent Today Focus layer */
+(function(){
+  const focusBanner=document.querySelector('#focusBanner');
+  const exitFocus=document.querySelector('#exitFocus');
+  if(exitFocus)exitFocus.onclick=()=>document.body.classList.remove('focus-mode');
+
+  const originalRender=window.render;
+  function todayKey(){return new Date().toISOString().slice(0,10)}
+  function smartFocus(){
+    const today=todayKey();
+    const open=state.tasks.filter(t=>!t.done);
+    const due=open.filter(t=>t.date===today);
+    const overdue=open.filter(t=>t.date&&t.date<today);
+    const high=open.filter(t=>t.priority==='high');
+    const priority=[...due,...overdue,...high].filter((v,i,a)=>a.indexOf(v)===i).slice(0,3);
+    const home=document.querySelector('#homeTasks');
+    if(home&&document.body.classList.contains('focus-mode')){
+      home.innerHTML=priority.length?priority.map(x=>'<div class="item"><div><b>'+esc(x.title)+'</b><small>'+esc(x.priority||'medium')+(x.date?' · '+esc(x.date):'')+'</small></div></div>').join(''):'<div class="empty-state">আজকের জন্য কোনো জরুরি কাজ নেই। 🌿</div>';
+    }
+  }
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='j'){e.preventDefault();document.body.classList.toggle('focus-mode');smartFocus();}
+  });
+  const obs=new MutationObserver(smartFocus);obs.observe(document.body,{attributes:true,attributeFilter:['class']});
+})();
