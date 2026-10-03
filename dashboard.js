@@ -19,11 +19,11 @@ function err(e){const map={"auth/invalid-email":"সঠিক Email address দ�
 $("emailLoginBtn").onclick=async()=>{msg("");const email=$("email").value.trim(),password=$("password").value;if(!email||!password){msg("Email এবং Password দুটোই দিন।");return}try{await signInWithEmailAndPassword(auth,email,password)}catch(e){msg(err(e))}};
 $("registerBtn").onclick=async()=>{const email=$("email").value.trim(),password=$("password").value;if(!email){msg("Email address দিন।");return}if(password.length<6){msg("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");return}try{await createUserWithEmailAndPassword(auth,email,password)}catch(e){msg(err(e))}};
 $("logoutBtn").onclick=()=>signOut(auth);
-$("saveGeminiKey").onclick=()=>{const k=$("geminiKey").value.trim();if(!k){$("uxToast").textContent="Enter a Gemini API key first.";return}localStorage.setItem(GEMINI_KEY_STORAGE,k);$("uxToast").textContent="Gemini key saved on this browser.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast").classList.remove("show"),1800)};
-$("actionPlan").onclick=runAIAction;
-$("actionConfirm").onclick=confirmAIAction;
-$("actionCancel").onclick=cancelAIAction;
-$("clearGeminiKey").onclick=()=>{localStorage.removeItem(GEMINI_KEY_STORAGE);$("geminiKey").value="";$("uxToast").textContent="Gemini key cleared.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast").classList.remove("show"),1800)};
+$("saveGeminiKey")?.addEventListener("click",()=>{const k=$("geminiKey").value.trim();if(!k){$("uxToast").textContent="Enter a Gemini API key first.";return}localStorage.setItem(GEMINI_KEY_STORAGE,k);$("uxToast").textContent="Gemini key saved on this browser.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast").classList.remove("show"),1800)};
+$("actionPlan")?.addEventListener("click",runAIAction);
+$("actionConfirm")?.addEventListener("click",confirmAIAction);
+$("actionCancel")?.addEventListener("click",cancelAIAction);
+$("clearGeminiKey")?.addEventListener("click",()=>{localStorage.removeItem(GEMINI_KEY_STORAGE);$("geminiKey").value="";$("uxToast").textContent="Gemini key cleared.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast")?.classList.remove("show"),1800)});
 window.addEventListener("load",()=>{if($("geminiKey"))$("geminiKey").value=getGeminiKey()});
 function ref(n){return collection(db,"users",auth.currentUser.uid,n)}
 function add(n,d){return addDoc(ref(n),{...d,createdAt:serverTimestamp()})}
