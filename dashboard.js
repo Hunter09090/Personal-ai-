@@ -1,14 +1,53 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signInWithPopup,signInWithRedirect,getRedirectResult,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore,collection,addDoc,deleteDoc,updateDoc,doc,onSnapshot,query,orderBy,serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyCymBHHTJobUogVnBCuSyYJlorMwkZN53E",authDomain:"new-ai-19692.firebaseapp.com",projectId:"new-ai-19692",storageBucket:"new-ai-19692.firebasestorage.app",messagingSenderId:"215456596142",appId:"1:215456596142:web:582e41fc1e7359bba32d3f",measurementId:"G-886M5V7BTD"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),googleProvider=new GoogleAuthProvider();
 const $=id=>document.getElementById(id), state={tasks:[],study:[],exams:[],results:[],attendance:[],finance:[],notes:[]},unsub={};
 const names=Object.keys(state);
-function msg(x){$("authMessage").textContent=x} function err(e){return e.message||"Authentication error"}
-$("emailLoginBtn").onclick=async()=>{try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);msg("")}catch(e){msg(err(e))}};
-$("registerBtn").onclick=async()=>{if($("password").value.length<6)return msg("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");try{await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);msg("")}catch(e){msg(err(e))}};
-$("googleLoginBtn").onclick=async()=>{try{await signInWithPopup(auth,googleProvider);msg("")}catch(e){msg(err(e))}};$("logoutBtn").onclick=()=>signOut(auth);
+function msg(x){$("authMessage").textContent=x||""}
+function err(e){
+  const code=e?.code||"";
+  const map={
+    "auth/invalid-email":"সঠিক Email address দিন।",
+    "auth/missing-password":"Password দিন।",
+    "auth/invalid-credential":"Email অথবা Password সঠিক নয়।",
+    "auth/user-not-found":"এই Email দিয়ে কোনো account পাওয়া যায়নি। আগে Create account করুন।",
+    "auth/wrong-password":"Password সঠিক নয়।",
+    "auth/email-already-in-use":"এই Email দিয়ে account আগে থেকেই আছে। Sign in করুন।",
+    "auth/weak-password":"Password কমপক্ষে 6 অক্ষরের হতে হবে।",
+    "auth/operation-not-allowed":"Firebase Authentication-এ এই sign-in method চালু করা হয়নি।",
+    "auth/popup-closed-by-user":"Google login window বন্ধ হয়ে গেছে। আবার চেষ্টা করুন।",
+    "auth/popup-blocked":"Browser popup block করেছে। Google login আবার চাপুন।",
+    "auth/unauthorized-domain":"এই website domain Firebase Authentication-এ অনুমোদিত নয়। Firebase Console-এর Authorized domains-এ GitHub Pages domain যোগ করতে হবে।",
+    "auth/network-request-failed":"Internet connection সমস্যা হয়েছে। আবার চেষ্টা করুন।"
+  };
+  return map[code]||e?.message||"Login করা যায়নি। আবার চেষ্টা করুন।";
+}
+$("emailLoginBtn").onclick=async()=>{
+  msg("");
+  const email=$("email").value.trim(), password=$("password").value;
+  if(!email||!password){msg("Email এবং Password দুটোই দিন।");return}
+  try{await signInWithEmailAndPassword(auth,email,password);msg("")}catch(e){msg(err(e))}
+};
+$("registerBtn").onclick=async()=>{
+  const email=$("email").value.trim(), password=$("password").value;
+  if(!email){msg("Email address দিন।");return}
+  if(password.length<6){msg("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");return}
+  try{await createUserWithEmailAndPassword(auth,email,password);msg("")}catch(e){msg(err(e))}
+};
+$("googleLoginBtn").onclick=async()=>{
+  msg("");
+  try{
+    await signInWithPopup(auth,googleProvider);
+  }catch(e){
+    if(e?.code==="auth/popup-blocked"){
+      try{await signInWithRedirect(auth,googleProvider);return}catch(x){msg(err(x));return}
+    }
+    msg(err(e));
+  }
+};
+getRedirectResult(auth).catch(e=>{if(e?.code)msg(err(e))});$("logoutBtn").onclick=()=>signOut(auth);
 function ref(n){return collection(db,"users",auth.currentUser.uid,n)} function add(n,d){return addDoc(ref(n),{...d,createdAt:serverTimestamp()})} function del(n,id){return deleteDoc(doc(db,"users",auth.currentUser.uid,n,id))} function patch(n,id,d){return updateDoc(doc(db,"users",auth.currentUser.uid,n,id),d)}
 onAuthStateChanged(auth,u=>{if(!u){$("loginPage").classList.remove("hidden");$("dashboardPage").classList.add("hidden");return} $("loginPage").classList.add("hidden");$("dashboardPage").classList.remove("hidden");$("welcomeText").textContent="Good "+(new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening")+", "+(u.displayName||u.email.split("@")[0])+" 👋";$("userBadge").textContent=(u.displayName||u.email)[0].toUpperCase();names.forEach(sub);});
 function sub(n){if(unsub[n])unsub[n]();unsub[n]=onSnapshot(query(ref(n),orderBy("createdAt","desc")),s=>{state[n]=s.docs.map(d=>({id:d.id,...d.data()}));render()},e=>console.error(e))}
