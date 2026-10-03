@@ -1,5 +1,5 @@
 const KEY="personalOS.v1";
-const EMPTY={tasks:[],goals:[],exams:[],finance:[],notes:[]};
+const EMPTY={tasks:[],goals:[],exams:[],finance:[],notes:[],study:[]};
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const id=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -23,18 +23,19 @@ function safe(fn){try{fn();}catch(error){console.error(error);toast("Something w
 function empty(message){return '<div class="empty-state">'+esc(message)+"</div>";}
 
 const cfg={
- task:["New task",[["title","Task","text",true],["date","Due date","date",false],["priority","Priority","select","medium,high,low"],["repeat","Repeat","select","none,daily,weekly,monthly"]]],
+ task:["New task",[["title","Task","text",true],["date","Due date","date",false],["priority","Priority","select","medium,high,low"],["category","Category","select","Personal,Study,Work,Finance,Important"],["tags","Tags","text",false],["goalId","Goal ID","text",false],["repeat","Repeat","select","none,daily,weekly,monthly"]]],
  goal:["New goal",[["title","Goal","text",true],["progress","Progress %","number",true]]],
  exam:["New exam",[["name","Exam name","text",true],["subject","Subject","text",true],["date","Date","date",true]]],
  finance:["New finance entry",[["title","Description","text",true],["amount","Amount","number",true],["type","Type","select","income,expense"]]],
- note:["New note",[["title","Title","text",true],["body","Note","textarea",true]]]
+ note:["New note",[["title","Title","text",true],["body","Note","textarea",true],["category","Category","select","Personal,Study,Work,Idea,Important"],["tags","Tags","text",false]]],
+ study:["New study session",[["subject","Subject","text",true],["topic","Topic / chapter","text",true],["date","Date","date",true],["duration","Minutes","number",true],["type","Type","select","Study,Revision,Practice"]]]
 };
 let editing=null;
 
 function openForm(type,index=null){
   const c=cfg[type]; if(!c)return;
   editing=index===null?null:{type,index};
-  const key={task:"tasks",goal:"goals",exam:"exams",finance:"finance",note:"notes"}[type];
+  const key={task:"tasks",goal:"goals",exam:"exams",finance:"finance",note:"notes",study:"study"}[type];
   const old=index===null?{}:state[key][index]||{};
   $("#modalTitle").textContent=index===null?c[0]:"Edit "+type;
   $("#form").innerHTML=c[1].map(([name,label,kind,extra])=>{
@@ -61,7 +62,7 @@ function close(){$("#modal").classList.add("hidden");editing=null;}
 function nav(page){
   $$(".page").forEach(el=>el.classList.toggle("active",el.id===page));
   $$(".nav").forEach(el=>el.classList.toggle("active",el.dataset.page===page));
-  $("#pageTitle").textContent={home:"Overview",tasks:"Tasks",goals:"Goals",exams:"Exams",finance:"Finance",notes:"Notes",insights:"Insights"}[page]||"Overview";
+  $("#pageTitle").textContent={home:"Overview",tasks:"Tasks",goals:"Goals",exams:"Exams",finance:"Finance",notes:"Notes",insights:"Insights",calendar:"Calendar",study:"Study Planner",settings:"Settings"}[page]||"Overview";
   $("#sidebar").classList.remove("open");
 }
 function removeItem(key,index){
@@ -156,7 +157,7 @@ $("#modal").onclick=e=>{if(e.target===$("#modal"))close();};
 document.addEventListener("click",e=>{
   const del=e.target.closest("[data-del]"),edit=e.target.closest("[data-edit]");
   if(del){const [key,index]=del.dataset.del.split("|");removeItem(key,Number(index));}
-  if(edit){const [key,index]=edit.dataset.edit.split("|");const type={tasks:"task",goals:"goal",exams:"exam",finance:"finance",notes:"note"}[key];if(type)openForm(type,Number(index));}
+  if(edit){const [key,index]=edit.dataset.edit.split("|");const type={tasks:"task",goals:"goal",exams:"exam",finance:"finance",notes:"note",study:"study"}[key];if(type)openForm(type,Number(index));}
 });
 document.addEventListener("change",e=>{
   if(e.target.dataset.check===undefined)return;
@@ -193,3 +194,16 @@ function tick(){
   $("#hello").textContent=(d.getHours()<12?"Good morning":d.getHours()<18?"Good afternoon":"Good evening")+" 👋";
 }
 setInterval(tick,1000);tick();render();
+
+let calendarDate=new Date();
+function renderCalendar(){if(!$("#calendarGrid"))return;const y=calendarDate.getFullYear(),m=calendarDate.getMonth(),first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),start=first.getDay();$("#monthLabel").textContent=new Date(y,m,1).toLocaleDateString("en-US",{month:"long",year:"numeric"});const events={};const add=(date,title,type)=>{if(date)(events[date]??=[]).push({title,type})};state.tasks.forEach(x=>add(x.date,x.title,"task"));state.exams.forEach(x=>add(x.date,x.subject,"exam"));let out="";for(let i=0;i<start;i++)out+='<div class="cal-day muted-day"></div>';for(let d=1;d<=days;d++){const k=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"),ev=events[k]||[];out+='<div class="cal-day"><b>'+d+"</b>"+ev.slice(0,3).map(e=>'<span class="cal-event '+e.type+'">'+esc(e.title)+"</span>").join("")+"</div>"}$("#calendarGrid").innerHTML=out}
+function renderStudy(){if(!$("#studyList"))return;$("#studyList").innerHTML=state.study.map((x,i)=>`<div class="row"><div class="row-main"><b>${esc(x.subject)} — ${esc(x.topic)}</b><small>${esc(x.type)} · ${esc(x.date)} · ${esc(x.duration)} min</small></div><div class="row-actions"><button type="button" data-edit="study|${i}">Edit</button><button type="button" class="danger" data-del="study|${i}">Delete</button></div></div>`).join("")||empty("No study sessions yet.")}
+function updateStorage(){const n=Object.values(state).reduce((s,a)=>s+a.length,0);if($("#storageText"))$("#storageText").textContent=n+" records";if($("#storageBar"))$("#storageBar").style.width=Math.min(100,n*5)+"%"}
+const _render=render;render=function(){_render();renderCalendar();renderStudy();updateStorage()};
+$("#prevMonth")?.addEventListener("click",()=>{calendarDate.setMonth(calendarDate.getMonth()-1);renderCalendar()});$("#nextMonth")?.addEventListener("click",()=>{calendarDate.setMonth(calendarDate.getMonth()+1);renderCalendar()});
+$("#settingsExport")?.addEventListener("click",exportData);$("#settingsImport")?.addEventListener("click",()=>$("#importFile").click());$("#settingsTheme")?.addEventListener("click",()=>$("#themeBtn").click());
+$("#clearData")?.addEventListener("click",()=>{if(confirm("Clear ALL local Personal OS data? This cannot be undone.")){state={tasks:[],goals:[],exams:[],finance:[],notes:[],study:[]};persist("All data cleared")}});
+$("#reminderBtn")?.addEventListener("click",async()=>{if(!("Notification" in window)){toast("Notifications are not supported");return}const p=await Notification.requestPermission();if($("#reminderStatus"))$("#reminderStatus").textContent=p==="granted"?"Reminders enabled":"Not enabled";localStorage.setItem("personalOS.reminders",p);toast(p==="granted"?"Reminders enabled":"Permission not granted")});
+$("#globalSearch")?.addEventListener("input",e=>{const q=e.target.value.trim().toLowerCase();if(!q)return;const all=[...state.tasks.map(x=>"Task: "+x.title),...state.goals.map(x=>"Goal: "+x.title),...state.exams.map(x=>"Exam: "+x.subject),...state.notes.map(x=>"Note: "+x.title),...state.study.map(x=>"Study: "+x.topic)];const hit=all.filter(x=>x.toLowerCase().includes(q));toast(hit.length?hit.slice(0,3).join(" • "):"No matches")});
+if($("#reminderStatus")&&localStorage.getItem("personalOS.reminders")==="granted")$("#reminderStatus").textContent="Reminders enabled";
+renderCalendar();renderStudy();updateStorage();
