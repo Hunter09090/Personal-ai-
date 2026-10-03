@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getAuth,onAuthStateChanged,signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore,collection,addDoc,deleteDoc,updateDoc,doc,onSnapshot,query,orderBy,serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig={apiKey:"AIzaSyCymBHHTJobUogVnBCuSyYJlorMwkZN53E",authDomain:"new-ai-19692.firebaseapp.com",projectId:"new-ai-19692",storageBucket:"new-ai-19692.firebasestorage.app",messagingSenderId:"215456596142",appId:"1:215456596142:web:582e41fc1e7359bba32d3f",measurementId:"G-886M5V7BTD"};
@@ -14,17 +14,7 @@ const names=Object.keys(state);
 let modalMode="add",modalType="",modalId="";
 const actionTypeMap={"add-task":"tasks","add-study":"study","add-exam":"exams","add-result":"results","add-attendance":"attendance","add-finance":"finance","add-note":"notes"};
 
-function msg(x){$("authMessage").textContent=x||""}
-function err(e){const map={"auth/invalid-email":"সঠিক Email address দিন।","auth/missing-password":"Password দিন।","auth/invalid-credential":"Email অথবা Password সঠিক নয়।","auth/user-not-found":"এই Email দিয়ে কোনো account পাওয়া যায়নি। আগে Create account করুন।","auth/wrong-password":"Password সঠিক নয়।","auth/email-already-in-use":"এই Email দিয়ে account আগে থেকেই আছে। Sign in করুন।","auth/weak-password":"Password কমপক্ষে 6 অক্ষরের হতে হবে।","auth/operation-not-allowed":"Firebase Authentication-এ এই sign-in method চালু করা হয়নি।","auth/unauthorized-domain":"এই website domain Firebase Authentication-এর Authorized domains-এ যোগ করুন।","auth/network-request-failed":"Internet connection সমস্যা হয়েছে। আবার চেষ্টা করুন।"};return map[e?.code]||e?.message||"কাজটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।"}
-$("emailLoginBtn").onclick=async()=>{msg("");const email=$("email").value.trim(),password=$("password").value;if(!email||!password){msg("Email এবং Password দুটোই দিন।");return}try{await signInWithEmailAndPassword(auth,email,password)}catch(e){msg(err(e))}};
-$("registerBtn").onclick=async()=>{const email=$("email").value.trim(),password=$("password").value;if(!email){msg("Email address দিন।");return}if(password.length<6){msg("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");return}try{await createUserWithEmailAndPassword(auth,email,password)}catch(e){msg(err(e))}};
-$("logoutBtn").onclick=()=>signOut(auth);
-$("saveGeminiKey")?.addEventListener("click",()=>{const k=$("geminiKey").value.trim();if(!k){$("uxToast").textContent="Enter a Gemini API key first.";return}localStorage.setItem(GEMINI_KEY_STORAGE,k);$("uxToast").textContent="Gemini key saved on this browser.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast")?.classList.remove("show"),1800)});
-$("actionPlan")?.addEventListener("click",runAIAction);
-$("actionConfirm")?.addEventListener("click",confirmAIAction);
-$("actionCancel")?.addEventListener("click",cancelAIAction);
-$("clearGeminiKey")?.addEventListener("click",()=>{localStorage.removeItem(GEMINI_KEY_STORAGE);$("geminiKey").value="";$("uxToast").textContent="Gemini key cleared.";$("uxToast").classList.add("show");setTimeout(()=>$("uxToast")?.classList.remove("show"),1800)});
-window.addEventListener("load",()=>{if($("geminiKey"))$("geminiKey").value=getGeminiKey()});
+async function startWorkspace(){try{await signInAnonymously(auth)}catch(e){console.error("Anonymous workspace sign-in failed:",e);alert("Workspace could not connect to Firebase. Please enable Anonymous Authentication in Firebase.");}}
 function ref(n){return collection(db,"users",auth.currentUser.uid,n)}
 function add(n,d){return addDoc(ref(n),{...d,createdAt:serverTimestamp()})}
 function del(n,id){return deleteDoc(doc(db,"users",auth.currentUser.uid,n,id))}

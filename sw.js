@@ -1,4 +1,4 @@
-const CACHE="personal-workspace-shell-v7";
+const CACHE="personal-workspace-shell-v8";
 const APP_SHELL=["./","./index.html","./style.css","./dashboard.js","./ux.js","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
