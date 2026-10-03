@@ -6,6 +6,7 @@ const firebaseConfig={apiKey:"AIzaSyCymBHHTJobUogVnBCuSyYJlorMwkZN53E",authDomai
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);
 const state={tasks:[],study:[],exams:[],results:[],attendance:[],finance:[],notes:[]},unsub={};
+let globalQuery="";
 const names=Object.keys(state);
 let modalMode="add",modalType="",modalId="";
 
@@ -127,11 +128,41 @@ function renderNotes(){
   $("noteList").innerHTML=state.notes.map(x=>"<article class=\"note-card\"><div class=\"card-top\"><span class=\"badge\">"+esc(x.category||"Note")+"</span><div><button class=\"row-edit\" data-edit=\"notes|"+x.id+"\">Edit</button><button class=\"row-delete\" data-delete=\"notes|"+x.id+"\">×</button></div></div><h3>"+esc(x.title)+"</h3><p>"+esc(x.body)+"</p></article>").join("");
   $("emptyNotes").style.display=state.notes.length?"none":"block";
 }
+function globalMatches(){
+  const q=globalQuery.toLowerCase().trim(); if(!q)return [];
+  const cfg=[
+    ["tasks","title","Tasks","tasks"],["study","subject","Study","study"],["exams","subject","Exams","exams"],
+    ["results","subject","Results","results"],["attendance","subject","Attendance","attendance"],
+    ["finance","title","Finance","finance"],["notes","title","Notes","notes"]
+  ],out=[];
+  cfg.forEach(([type,key,label,section])=>state[type].forEach(x=>{
+    const hay=Object.values(x).filter(v=>v!=null).join(" ").toLowerCase();
+    if(hay.includes(q))out.push({type,section,label,id:x.id,title:x[key]||x.subject||x.title||"Record",meta:x.category||x.status||x.date||""});
+  }));
+  return out.slice(0,12);
+}
+function renderGlobalSearch(){
+  const box=$("globalResults"); if(!box)return;
+  const q=globalQuery.trim(); if(!q){box.classList.add("hidden");box.innerHTML="";return}
+  const m=globalMatches();
+  box.innerHTML=m.length?m.map(x=>"<button class=\"global-result\" data-global-section=\""+x.section+"\" data-global-id=\""+x.id+"\"><span><strong>"+esc(x.title)+"</strong><small>"+esc(x.label)+" · "+esc(x.meta)+"</small></span><b>→</b></button>").join(""):"<div class=\"global-empty\">No matching records found.</div>";
+  box.classList.remove("hidden");
+}
 function renderOverview(){
   const today=new Date();today.setHours(0,0,0,0);
   const open=state.tasks.filter(x=>!x.completed),done=state.tasks.filter(x=>x.completed);
   const avg=state.study.length?Math.round(state.study.reduce((s,x)=>s+(+x.progress||0),0)/state.study.length):0;
   $("statTasks").textContent=open.length;$("statCompleted").textContent=done.length;$("statStudy").textContent=avg+"%";
+  const now=new Date(),m=now.getMonth(),y=now.getFullYear();
+  const income=state.finance.filter(x=>x.type==="income"&&x.date&&new Date(x.date+"T00:00:00").getMonth()===m&&new Date(x.date+"T00:00:00").getFullYear()===y).reduce((a,x)=>a+(+x.amount||0),0);
+  const expense=state.finance.filter(x=>x.type==="expense"&&x.date&&new Date(x.date+"T00:00:00").getMonth()===m&&new Date(x.date+"T00:00:00").getFullYear()===y).reduce((a,x)=>a+(+x.amount||0),0);
+  $("statBalance").textContent=money(income-expense);
+  $("analyticsTasks").textContent=state.tasks.length?Math.round(done.length/state.tasks.length*100)+"%":"0%";
+  $("analyticsStudy").textContent=avg+"%";
+  $("analyticsResults").textContent=state.results.length?Math.round(state.results.reduce((a,x)=>a+(+x.marks||0),0)/Math.max(1,state.results.reduce((a,x)=>a+(+x.total||0),0))*100)+"%":"0%";
+  const at=state.attendance.length,p=state.attendance.filter(x=>x.status==="Present").length;
+  $("analyticsAttendance").textContent=at?Math.round(p/at*100)+"%":"0%";
+  $("financeAnalytics").innerHTML="<div><span>Income</span><strong>"+money(income)+"</strong></div><div><span>Expense</span><strong>"+money(expense)+"</strong></div><div><span>Net</span><strong>"+money(income-expense)+"</strong></div>";
   const a=open.slice(0,5),e=state.exams.filter(x=>x.date&&new Date(x.date+"T00:00:00")>=today).sort((x,y)=>x.date.localeCompare(y.date)).slice(0,5);
   $("overviewTasks").innerHTML=a.length?a.map(x=>"<div class=\"compact-row\"><span class=\"dot\"></span><div><strong>"+esc(x.title)+"</strong><small>"+esc(x.category||"personal")+(x.date?" · "+date(x.date):"")+"</small></div></div>").join(""):"<div class=\"empty-mini\">You are clear. Nice.</div>";
   $("overviewExams").innerHTML=e.length?e.map(x=>"<div class=\"compact-row\"><span class=\"date-box\">"+new Date(x.date+"T00:00:00").getDate()+"</span><div><strong>"+esc(x.subject)+"</strong><small>"+esc(x.exam)+" · "+date(x.date)+"</small></div></div>").join(""):"<div class=\"empty-mini\">No upcoming exams.</div>";
@@ -152,9 +183,11 @@ function printSection(type){
   win.document.write("<!doctype html><html><head><title>"+labels[type]+"</title><style>body{font-family:Arial,sans-serif;padding:28px;color:#111}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:9px;text-align:left}th{background:#f5f5f5}</style></head><body><h1>"+labels[type]+"</h1><p>Generated "+new Date().toLocaleString()+"</p><table><thead><tr>"+fields.map(f=>"<th>"+esc(f)+"</th>").join("")+"</tr></thead><tbody>"+rows.map(r=>"<tr>"+fields.map(f=>"<td>"+esc(r[f])+"</td>").join("")+"</tr>").join("")+"</tbody></table></body></html>");
   win.document.close();win.focus();setTimeout(()=>win.print(),250);
 }
-function render(){renderOverview();renderTasks();renderStudy();renderExams();renderResults();renderAttendance();renderFinance();renderNotes()}
+function render(){renderOverview();renderGlobalSearch();renderTasks();renderStudy();renderExams();renderResults();renderAttendance();renderFinance();renderNotes()}
 
 document.addEventListener("click",e=>{
+  const gr=e.target.closest("[data-global-section]");
+  if(gr){const b=document.querySelector("[data-section=\""+gr.dataset.globalSection+"\"]");if(b)b.click();$("globalSearch").value="";globalQuery="";renderGlobalSearch();return}
   const ex=e.target.closest("[data-export]");if(ex){downloadCSV(ex.dataset.export);return}
   const pr=e.target.closest("[data-print]");if(pr){printSection(pr.dataset.print);return}
   const a=e.target.closest("[data-action]");if(a)openForm(a.dataset.action.replace("add-",""));
@@ -163,6 +196,9 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{const t=e.target.closest("[data-toggle-task]");if(t)patch("tasks",t.dataset.toggleTask,{completed:t.checked}).catch(x=>{t.checked=!t.checked;alert(err(x))})});
 ["taskSearch","taskFilter","taskPriorityFilter"].forEach(id=>$(id)?.addEventListener("input",renderTasks));
+$("globalSearch")?.addEventListener("input",e=>{globalQuery=e.target.value;renderGlobalSearch()});
+document.addEventListener("click",e=>{if(!e.target.closest(".global-search-wrap")){renderGlobalSearch()}});
+
 $("closeModal").onclick=closeModal;$("modal").onclick=e=>{if(e.target===$("modal"))closeModal()};
 document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{document.querySelectorAll(".section").forEach(s=>s.classList.remove("active-section"));$(b.dataset.section).classList.add("active-section");document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n===b));$("sidebar").classList.remove("active")});
 document.querySelectorAll("[data-section-link]").forEach(b=>b.onclick=()=>document.querySelector("[data-section=\""+b.dataset.sectionLink+"\"]").click());
